@@ -2,16 +2,22 @@ package radm;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import org.junit.runners.model.FrameworkMethod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A test method with an expanded-out set of arguments ready to be run.
  */
 public class MethodWithArguments extends FrameworkMethod {
 
-	final Object[] args;
+	private static final Logger LOG = LoggerFactory
+			.getLogger(MethodWithArguments.class);
+
+	private final Object[] args;
 
 	public MethodWithArguments(Method method, Object[] args) {
 		super(method);
@@ -21,6 +27,10 @@ public class MethodWithArguments extends FrameworkMethod {
 	@Override
 	public Object invokeExplosively(Object target, Object... params)
 			throws Throwable {
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("Executing {}", this);
+		}
 		return super.invokeExplosively(target, args);
 	}
 
@@ -52,8 +62,12 @@ public class MethodWithArguments extends FrameworkMethod {
 
 	@Override
 	public int hashCode() {
-		// TODO Auto-generated method stub
-		return super.hashCode();
+		return Objects.hash(getMethod(), Arrays.hashCode(args));
+	}
+
+	@Override
+	public String toString() {
+		return getName();
 	}
 
 }

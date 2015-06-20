@@ -1,7 +1,6 @@
 package radm;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.experimental.theories.Theory;
@@ -18,10 +17,17 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 	private TheoriesWrapper embeddedRunner;
 
+	private List<FrameworkMethod> allMethodsWithAllArgs;
+
+	private InitializationError initFail;
+
 	public TheorySuite(Class<?> testClass) throws InitializationError {
 		super(testClass);
 
-		embeddedRunner = new TheoriesWrapper(testClass);
+		if (initFail != null)
+		{
+			throw initFail;
+		}
 	}
 
 
@@ -30,9 +36,9 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
          TheoriesWrapper runner = getEmbeddedRunner();
 
-         if (runner != null)
+         if (runner != null && allMethodsWithAllArgs == null)
          {
-        	 List<FrameworkMethod> allMethodsWithAllArgs = new ArrayList<>();
+        	 allMethodsWithAllArgs = new ArrayList<>();
         	 for (FrameworkMethod fm : runner.computeTestMethods())
         	 {
         		 if (fm.getAnnotation(Theory.class) == null)
@@ -44,11 +50,19 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
         			 allMethodsWithAllArgs.addAll(runner.computeTestMethodsWithArgs(fm));
         		 }
         	 }
-        	 return allMethodsWithAllArgs;
          }
 
-         return Collections.EMPTY_LIST;
+         return allMethodsWithAllArgs;
     }
+
+
+	@Override
+	public int testCount() {
+		 int size = computeTestMethods().size();
+		 LOG.info("Executing {} tests", size);
+
+		 return size;
+	}
 
 
 	/**
@@ -62,7 +76,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 			try {
 				embeddedRunner = new TheoriesWrapper(getTestClass().getJavaClass());
 			} catch (InitializationError e) {
-				LOG.debug("ignoring initialisation error, will be rereported later", e);
+				initFail = e;
 			}
 		}
 

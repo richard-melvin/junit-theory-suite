@@ -30,7 +30,21 @@ public class ExampleTest {
 	public static int[] monthDays = IntStream.range(1, 31).toArray();
 
 	@DataPoints
-	public static List<Year> years = IntStream.range(1995, 1997).boxed().map(Year::of).collect(Collectors.toList());
+	public static List<Year> years = IntStream.range(1995, 1999).boxed()
+			.map(Year::of).collect(Collectors.toList());
+
+	@Test
+	public void simpleTest() {
+		assertTrue(Year.of(2012).isLeap());
+	}
+
+	@Theory
+	public void theoryOnYearOnly(Year year) {
+		assumeTrue(year.isLeap());
+
+		assertEquals(Month.FEBRUARY.maxLength(), year.atMonth(Month.FEBRUARY)
+				.lengthOfMonth());
+	}
 
 	@Theory
 	public void theoryOnYearAndMonth(Year year, Month month) throws Exception {
@@ -42,21 +56,16 @@ public class ExampleTest {
 	}
 
 	@Theory
-	public void theoryOnYearAndWeekday(Year year, int monthDay, DayOfWeek day) throws Exception {
+	public void theoryOnYearAndWeekday(Year year, int monthDay, DayOfWeek day)
+			throws Exception {
 
 		YearMonth febForYear = year.atMonth(Month.FEBRUARY);
 		assumeTrue(monthDay <= febForYear.lengthOfMonth());
 		assumeTrue(febForYear.atDay(monthDay).getDayOfWeek() == day);
 
-		assertTrue(febForYear.atDay(monthDay).minusDays(1).getDayOfWeek() == day.minus(1));
+		assertTrue(febForYear.atDay(monthDay).minusDays(1).getDayOfWeek() == day
+				.minus(1));
 
-	}
-
-	@Test
-	public void simpleTest() {
-		assertTrue(Year.of(2012).isLeap());
 	}
 
 }
-
-

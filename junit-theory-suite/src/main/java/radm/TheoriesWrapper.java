@@ -2,7 +2,9 @@ package radm;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.experimental.theories.PotentialAssignment;
@@ -10,13 +12,19 @@ import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.internal.Assignments;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simple wrapper to allow reuse of validation logic.
  */
 public class TheoriesWrapper extends Theories {
 
-	private List<MethodWithArguments> completeAssignments = new ArrayList<>();
+	private static final Logger LOG = LoggerFactory
+			.getLogger(TheoriesWrapper.class);
+
+	private Set<MethodWithArguments> testsCalls = new HashSet<>();
+	private List<MethodWithArguments> testsCallsInOrder = new ArrayList<>();
 
 	public TheoriesWrapper(Class<?> klass) throws InitializationError {
 		super(klass);
@@ -27,11 +35,20 @@ public class TheoriesWrapper extends Theories {
 		return super.computeTestMethods();
 	}
 
-	public Collection<? extends FrameworkMethod> computeTestMethodsWithArgs(
+	/**
+	 * Compute the set of methods with known argument values.
+	 *
+	 * @param fm the framework method
+	 * @return the collection
+	 */
+	public Collection<MethodWithArguments> computeTestMethodsWithArgs(
 			FrameworkMethod fm) {
 
 		Assignments allUnassigned = Assignments.allUnassigned(fm.getMethod(),
 				getTestClass());
+
+		testsCalls.clear();
+		testsCallsInOrder.clear();
 
 		try {
 			expand(fm, allUnassigned);
@@ -40,15 +57,24 @@ public class TheoriesWrapper extends Theories {
 					+ ":" + e.toString());
 		}
 
-		return completeAssignments;
+		return testsCallsInOrder;
 	}
 
 	private void expand(FrameworkMethod fm, Assignments assignments)
 			throws Throwable {
 
 		if (assignments.isComplete()) {
-			completeAssignments.add(new MethodWithArguments(fm.getMethod(),
-					assignments.getAllArguments()));
+			MethodWithArguments testCall = new MethodWithArguments(fm.getMethod(),
+					assignments.getAllArguments());
+
+			if (!testsCalls.contains(testCall)) {
+				if (LOG.isDebugEnabled())
+				{
+					LOG.debug("Identified test case {}", testCall);
+				}
+				testsCalls.add(testCall);
+				testsCallsInOrder.add(testCall);
+			}
 			return;
 		}
 
