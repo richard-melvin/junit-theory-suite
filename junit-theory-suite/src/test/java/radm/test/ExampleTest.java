@@ -1,7 +1,6 @@
 package radm.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
 import java.time.DayOfWeek;
@@ -13,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
@@ -27,10 +27,10 @@ import radm.TheorySuite;
 public class ExampleTest {
 
 	@DataPoints
-	public static int[] monthDays = IntStream.of(1, 31).toArray();
+	public static int[] monthDays = IntStream.range(1, 31).toArray();
 
 	@DataPoints
-	public static List<Year> years = IntStream.of(1995, 2045).boxed().map(Year::of).collect(Collectors.toList());
+	public static List<Year> years = IntStream.range(1995, 1997).boxed().map(Year::of).collect(Collectors.toList());
 
 	@Theory
 	public void theoryOnYearAndMonth(Year year, Month month) throws Exception {
@@ -48,8 +48,13 @@ public class ExampleTest {
 		assumeTrue(monthDay <= febForYear.lengthOfMonth());
 		assumeTrue(febForYear.atDay(monthDay).getDayOfWeek() == day);
 
-		assertTrue(febForYear.atDay(monthDay - 1).getDayOfWeek() == day.minus(1));
+		assertTrue(febForYear.atDay(monthDay).minusDays(1).getDayOfWeek() == day.minus(1));
 
+	}
+
+	@Test
+	public void simpleTest() {
+		assertTrue(Year.of(2012).isLeap());
 	}
 
 }

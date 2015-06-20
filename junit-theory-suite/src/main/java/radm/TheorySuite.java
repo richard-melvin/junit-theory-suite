@@ -1,14 +1,22 @@
 package radm;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.junit.experimental.theories.Theory;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TheorySuite extends BlockJUnit4ClassRunner {
 
-	private final TheoriesWrapper embeddedRunner;
+	private static final Logger LOG = LoggerFactory
+			.getLogger(TheorySuite.class);
+
+	private TheoriesWrapper embeddedRunner;
 
 	public TheorySuite(Class<?> testClass) throws InitializationError {
 		super(testClass);
@@ -16,11 +24,50 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		embeddedRunner = new TheoriesWrapper(testClass);
 	}
 
-	@Override
-	protected List<FrameworkMethod> getChildren() {
-		return super.getChildren();
-	}
 
+    @Override
+    protected List<FrameworkMethod> computeTestMethods() {
+
+         TheoriesWrapper runner = getEmbeddedRunner();
+
+         if (runner != null)
+         {
+        	 List<FrameworkMethod> allMethodsWithAllArgs = new ArrayList<>();
+        	 for (FrameworkMethod fm : runner.computeTestMethods())
+        	 {
+        		 if (fm.getAnnotation(Theory.class) == null)
+        		 {
+        			 allMethodsWithAllArgs.add(fm);
+        		 }
+        		 else
+        		 {
+        			 allMethodsWithAllArgs.addAll(runner.computeTestMethodsWithArgs(fm));
+        		 }
+        	 }
+        	 return allMethodsWithAllArgs;
+         }
+
+         return Collections.EMPTY_LIST;
+    }
+
+
+	/**
+	 * Gets the embedded runner; needed as virtual methods get called from super constructor
+	 *
+	 * @return the embedded runner
+	 */
+	private TheoriesWrapper getEmbeddedRunner() {
+		if (embeddedRunner == null)
+		{
+			try {
+				embeddedRunner = new TheoriesWrapper(getTestClass().getJavaClass());
+			} catch (InitializationError e) {
+				LOG.debug("ignoring initialisation error, will be rereported later", e);
+			}
+		}
+
+		return embeddedRunner;
+	}
 
 
 
