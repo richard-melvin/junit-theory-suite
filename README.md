@@ -2,6 +2,9 @@
 
 [![Build Status](https://travis-ci.org/richard-melvin/junit-theory-suite.svg?branch=master)](https://travis-ci.org/richard-melvin/junit-theory-suite)
 
+[![Release](https://img.shields.io/github/release/richard-melvin/junit-theory-suite.svg?label=JitPack)](https://img.shields.io/github/release/richard-melvin/junit-theory-suite.svg?label=JitPack)
+
+
 junit-theory-suite is a simple library that replaces the default [JUnit](https://github.com/junit-team/junit)
 [theories](https://github.com/junit-team/junit/wiki/Theories) runner with
 one that treats each individual combination of parameters as a distinct test case.
