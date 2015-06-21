@@ -19,31 +19,29 @@ public class ExampleTest {
 
 	@Theory
 	public void theoryOnYearOnly(Year year) {
-		assumeTrue(year.isLeap());
-
-		assertEquals(Month.FEBRUARY.maxLength(), year.atMonth(Month.FEBRUARY)
-				.lengthOfMonth());
+		if (year.isLeap()) {
+			assertEquals(Month.FEBRUARY.maxLength(),
+					year.atMonth(Month.FEBRUARY).lengthOfMonth());
+		} else {
+			assertEquals(Month.FEBRUARY.minLength(),
+					year.atMonth(Month.FEBRUARY).lengthOfMonth());
+		}
 	}
-
 
 ```
 
 will produce junit XML results:
 
 ```xml
-  <testcase classname="com.github.radm.test.ExampleTest" name="theoryOnYearOnly(1995)" time="0">
-    <skipped/>
-  </testcase>
+  <testcase classname="com.github.radm.test.ExampleTest" name="theoryOnYearOnly(1995)" time="0"/>
   <testcase classname="com.github.radm.test.ExampleTest" name="theoryOnYearOnly(1996)" time="0"/>
-  <testcase classname="com.github.radm.test.ExampleTest" name="theoryOnYearOnly(1997)" time="0">
-    <skipped/>
-  </testcase>
-  <testcase classname="com.github.radm.test.ExampleTest" name="theoryOnYearOnly(1998)" time="0">
-    <skipped/>
-  </testcase>
+  <testcase classname="com.github.radm.test.ExampleTest" name="theoryOnYearOnly(1997)" time="0"/>
+  <testcase classname="com.github.radm.test.ExampleTest" name="theoryOnYearOnly(1998)" time="0.001"/>
 ```
 
 The individual test cases are also visible in IDE test runners such as Eclipse.
+
+[![Eclipse runner](https://github.com/richard-melvin/junit-theory-suite/runner.png)](https://github.com/richard-melvin/junit-theory-suite/runner.png)
 
 To use it, simply:
 
