@@ -41,7 +41,7 @@ will produce junit XML results:
 
 The individual test cases are also visible in IDE test runners such as Eclipse.
 
-[![Eclipse runner](https://github.com/richard-melvin/junit-theory-suite/runner.png)](https://github.com/richard-melvin/junit-theory-suite/runner.png)
+[![Eclipse runner](runner.png?raw=true)]
 
 To use it, simply:
 
