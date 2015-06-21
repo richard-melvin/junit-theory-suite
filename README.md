@@ -1,5 +1,7 @@
 ## junit-theory-suite - an alternative test runner for JUnit theories
 
+[![Build Status](https://travis-ci.org/richard-melvin/junit-theory-suite.svg?branch=master)](https://travis-ci.org/richard-melvin/junit-theory-suite)
+
 junit-theory-suite is a simple library that replaces the default [JUnit](https://github.com/junit-team/junit)
 [theories](https://github.com/junit-team/junit/wiki/Theories) runner with
 one that treats each individual combination of parameters as a distinct test case.
@@ -42,4 +44,27 @@ will produce junit XML results:
 
 The individual test cases are also visible in IDE test runners such as Eclipse.
 
-To use it, simply replace `@RunWith(Theories.class)` with `@RunWith(TheorySuite.class)`
+To use it, simply:
+
+
+- replace `@RunWith(Theories.class)` with `@RunWith(TheorySuite.class)`
+
+- add the following lines to the appropriate parts of pom.xml (for maven):
+
+```xml
+
+	<repository>
+	    <id>jitpack.io</id>
+	    <url>https://jitpack.io</url>
+	</repository>
+
+
+	<dependency>
+	    <groupId>com.github.richard-melvin</groupId>
+	    <artifactId>junit-theory-suite</artifactId>
+	    <version>0.1</version>
+	</dependency>
+
+```
+
+This uses [jitpack.io](https://jitpack.io/) as a lightweight alternative to releasing to maven central.
