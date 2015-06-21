@@ -41,7 +41,7 @@ will produce junit XML results:
 
 The individual test cases are also visible in IDE test runners such as Eclipse.
 
-[![Eclipse runner](runner.png?raw=true)]
+![Eclipse runner](runner.png?raw=true)
 
 To use it, simply:
 
@@ -67,3 +67,11 @@ To use it, simply:
 ```
 
 This uses [jitpack.io](https://jitpack.io/) as a lightweight alternative to releasing to maven central.
+
+# Known differences to the standard theories runner
+
+1. `@Before` and `@After` are run before each individual test case, not test method.
+2. The JUnit rule `TestName` reports the test case with the argument values filled in, e.g. `theoryOnYearAndMonth(1995,OCTOBER)`
+2. [bug] a test method where all sets of arguments fail assumptions within the theory will wrongly pass.
+
+
