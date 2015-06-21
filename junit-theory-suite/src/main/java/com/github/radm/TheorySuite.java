@@ -1,4 +1,4 @@
-package radm;
+package com.github.radm;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,9 +17,9 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 	private TheoriesWrapper embeddedRunner;
 
-	private List<FrameworkMethod> allMethodsWithAllArgs;
+	private List<FrameworkMethod> allMethodsWithAllArgs = null;
 
-	private InitializationError initFail;
+	private InitializationError initFail = null;
 
 	public TheorySuite(Class<?> testClass) throws InitializationError {
 		super(testClass);

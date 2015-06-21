@@ -2,9 +2,9 @@
  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 >
  <modelVersion>4.0.0</modelVersion>
- <groupId>radm</groupId>
+ <groupId>com.github.radm</groupId>
  <artifactId>junit-theory-suite</artifactId>
- <version>0.0.1-SNAPSHOT</version>
+ <version>0.1.0</version>
  <name>Junit Theory Suite runner</name>
  <properties>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -35,4 +35,23 @@
    <scope>test</scope>
   </dependency>
  </dependencies>
+  <scm>
+  <url>https://github.com/radm/junit-theory-suite</url>
+ </scm>
+ <issueManagement>
+  <system>Github Issues</system>
+  <url>https://github.com/radm/junit-theory-suite/issues</url>
+ </issueManagement>
+ <developers>
+  <developer>
+   <email>richard.melvin@scisys.co.uk</email>
+  </developer>
+ </developers>
+ <licenses>
+  <license>
+   <name>The MIT License (MIT)</name>
+   <distribution>repo</distribution>
+  </license>
+ </licenses>
+ <inceptionYear>2013</inceptionYear>
 </project>

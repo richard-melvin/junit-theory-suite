@@ -1,4 +1,4 @@
-package radm;
+package com.github.radm;
 
 import java.util.ArrayList;
 import java.util.Collection;

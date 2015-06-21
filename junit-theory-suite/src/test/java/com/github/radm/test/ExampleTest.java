@@ -1,4 +1,4 @@
-package radm.test;
+package com.github.radm.test;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
@@ -17,7 +17,7 @@ import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
-import radm.TheorySuite;
+import com.github.radm.TheorySuite;
 
 /**
  * Sample test to demonstrate the use of TheorySuite runner.
