@@ -1,8 +1,6 @@
 ## junit-theory-suite - an alternative test runner for JUnit theories
 
-[![Build Status](https://travis-ci.org/richard-melvin/junit-theory-suite.svg?branch=master)](https://travis-ci.org/richard-melvin/junit-theory-suite)
-
-[![Release](https://img.shields.io/github/release/richard-melvin/junit-theory-suite.svg?label=JitPack)](https://img.shields.io/github/release/richard-melvin/junit-theory-suite.svg?label=JitPack)
+[![Build Status](https://travis-ci.org/richard-melvin/junit-theory-suite.svg?branch=master)](https://travis-ci.org/richard-melvin/junit-theory-suite) [![Release](https://img.shields.io/github/release/richard-melvin/junit-theory-suite.svg?label=JitPack)](https://img.shields.io/github/release/richard-melvin/junit-theory-suite.svg?label=JitPack)
 
 
 junit-theory-suite is a simple library that replaces the default [JUnit](https://github.com/junit-team/junit)

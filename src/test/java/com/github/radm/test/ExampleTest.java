@@ -12,19 +12,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theory;
+import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 
 import com.github.radm.TheorySuite;
 
 /**
- * Sample test to demonstrate the use of TheorySuite runner.
- *
+ * Sample test to demonstrate the use of {@link com.github.radm.TheorySuite} runner.
  */
 @RunWith(TheorySuite.class)
 public class ExampleTest {
+
+	@Rule
+	public TestName testName = new TestName();
 
 	@DataPoints
 	public static int[] monthDays = IntStream.range(1, 31).toArray();
@@ -33,31 +37,52 @@ public class ExampleTest {
 	public static List<Year> years = IntStream.range(1995, 1999).boxed()
 			.map(Year::of).collect(Collectors.toList());
 
+	/**
+	 * Simple tests cases take no arguments.
+	 */
 	@Test
 	public void simpleTest() {
 		assertTrue(Year.of(2012).isLeap());
 	}
 
+	/**
+	 * Theories have arguments that get filled in from static members based on
+	 * annotations.
+	 * By default, arguments are matched to datapoints based on type.
+	 */
 	@Theory
 	public void theoryOnYearOnly(Year year) {
-		assumeTrue(year.isLeap());
-
-		assertEquals(Month.FEBRUARY.maxLength(), year.atMonth(Month.FEBRUARY)
-				.lengthOfMonth());
+		if (year.isLeap()) {
+			assertEquals(Month.FEBRUARY.maxLength(),
+					year.atMonth(Month.FEBRUARY).lengthOfMonth());
+		} else {
+			assertEquals(Month.FEBRUARY.minLength(),
+					year.atMonth(Month.FEBRUARY).lengthOfMonth());
+		}
 	}
 
+	/**
+	 * Theories can have multiple arguments; all possible combinations are
+	 * exercised. Enumerations and booleans don't need to be set up as
+	 * datapoints, given all possible values are to be used as inputs.
+	 * Change the assertion to use '==' to have it fail on one case out of 48.
+	 */
 	@Theory
-	public void theoryOnYearAndMonth(Year year, Month month) throws Exception {
+	public void theoryOnYearAndMonth(Year year, Month month) {
 
-		assumeTrue(month != Month.FEBRUARY);
 		LocalDate atEndOfMonth = year.atMonth(month).atEndOfMonth();
-		assertEquals(month.maxLength(), atEndOfMonth.getDayOfMonth());
+
+		assertTrue(month.maxLength() >= atEndOfMonth.getDayOfMonth());
+		assertTrue(month.minLength() <= atEndOfMonth.getDayOfMonth());
 
 	}
 
+	/**
+	 * It is possible to discard datapoints for a particular test by
+	 * using {@link Assume.assumeTrue}.
+	 */
 	@Theory
-	public void theoryOnYearAndWeekday(Year year, int monthDay, DayOfWeek day)
-			throws Exception {
+	public void theoryOnYearAndWeekday(Year year, int monthDay, DayOfWeek day) {
 
 		YearMonth febForYear = year.atMonth(Month.FEBRUARY);
 		assumeTrue(monthDay <= febForYear.lengthOfMonth());
@@ -65,7 +90,18 @@ public class ExampleTest {
 
 		assertTrue(febForYear.atDay(monthDay).minusDays(1).getDayOfWeek() == day
 				.minus(1));
-
 	}
 
+	/**
+	 * The {@link org.junit.rules.TestName} rule can be used to find the name
+	 * of the currently running test. When the {@link com.github.radm.TheorySuite}
+	 * runner is used in a theory, this name contains the argument values used in the current test case.
+	 */
+	@Theory
+	public void theoryUsingTestName(DayOfWeek day) {
+
+		assertTrue(testName.getMethodName().startsWith("theoryUsingTestName"));
+		assertTrue(testName.getMethodName().contains(day.toString()));
+
+	}
 }
