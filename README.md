@@ -61,7 +61,7 @@ To use it, simply:
 	<dependency>
 	    <groupId>com.github.richard-melvin</groupId>
 	    <artifactId>junit-theory-suite</artifactId>
-	    <version>0.3.0</version>
+	    <version>v0.3.0</version>
 	</dependency>
 
 ```
