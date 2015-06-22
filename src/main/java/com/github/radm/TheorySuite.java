@@ -2,6 +2,7 @@ package com.github.radm;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,6 +50,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 	@Override
 	public Description getDescription() {
+		assert suiteDescription != null;
 		return suiteDescription;
 	}
 
@@ -57,12 +59,15 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 		TheoriesWrapper runner = getEmbeddedRunner();
 
-		if (runner != null && allMethodsWithAllArgs == null) {
+		if (runner == null) {
+			return Collections.EMPTY_LIST;
+		}
+
+		if (allMethodsWithAllArgs == null) {
 			init();
 			for (FrameworkMethod fm : runner.computeTestMethods()) {
 				if (fm.getAnnotation(Theory.class) == null) {
 					recordNonTheoryCase(fm);
-
 				} else {
 					recordTheoryCase(runner, fm);
 				}
@@ -74,7 +79,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 	/**
 	 * Initialise all data members. Needed as a lot of work gets done before
-	 * constrcutor completes.
+	 * constructor completes.
 	 */
 	private void init() {
 		suiteDescription = Description.createSuiteDescription(getTestClass().getJavaClass());
@@ -83,15 +88,25 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 	}
 
 	private void recordNonTheoryCase(FrameworkMethod fm) {
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("non-theory test {}", fm);
+		}
 		allMethodsWithAllArgs.add(fm);
 		Description desc = Description.createTestDescription(
 				suiteDescription.getTestClass(), fm.getName());
 		suiteDescription.addChild(desc);
 
 		descriptions.put(fm, desc);
+
 	}
 
 	private void recordTheoryCase(TheoriesWrapper runner, FrameworkMethod fm) {
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("theory {}", fm);
+		}
+
 		Description methodDescription = Description.createSuiteDescription(fm
 				.getName());
 		suiteDescription.addChild(methodDescription);
@@ -117,10 +132,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 	@Override
 	public int testCount() {
-		int size = computeTestMethods().size();
-		LOG.info("Executing {} tests", size);
-
-		return size;
+		return computeTestMethods().size();
 	}
 
 	@Override
