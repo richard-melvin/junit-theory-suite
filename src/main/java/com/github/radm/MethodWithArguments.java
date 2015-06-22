@@ -70,4 +70,13 @@ public class MethodWithArguments extends FrameworkMethod {
 		return getName();
 	}
 
+	/**
+	 * Gets the underlying method, without arguments specified.
+	 *
+	 * @return the parent
+	 */
+	public FrameworkMethod getParent()
+	{
+		return new FrameworkMethod(getMethod());
+	}
 }

@@ -68,9 +68,9 @@ public class TheoriesWrapper extends Theories {
 					assignments.getAllArguments());
 
 			if (!testsCalls.contains(testCall)) {
-				if (LOG.isDebugEnabled())
+				if (LOG.isTraceEnabled())
 				{
-					LOG.debug("Identified test case {}", testCall);
+					LOG.trace("Identified test case {}", testCall);
 				}
 				testsCalls.add(testCall);
 				testsCallsInOrder.add(testCall);

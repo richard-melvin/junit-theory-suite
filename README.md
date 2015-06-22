@@ -61,7 +61,7 @@ To use it, simply:
 	<dependency>
 	    <groupId>com.github.richard-melvin</groupId>
 	    <artifactId>junit-theory-suite</artifactId>
-	    <version>0.2</version>
+	    <version>0.3.0</version>
 	</dependency>
 
 ```
@@ -72,7 +72,6 @@ This uses [jitpack.io](https://jitpack.io/) as a lightweight alternative to rele
 
 1. `@Before` and `@After` are run before each individual test case, not test method.
 2. The JUnit rule `TestName` reports the test case with the argument values filled in, e.g. `theoryOnYearAndMonth(1995,OCTOBER)`
-2. [bug] a test method where all sets of arguments fail assumptions within the theory will wrongly pass.
 
 
 

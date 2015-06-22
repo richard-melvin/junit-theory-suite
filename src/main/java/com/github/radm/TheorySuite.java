@@ -1,13 +1,17 @@
 package com.github.radm;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.Description;
+import org.junit.runner.notification.Failure;
+import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
@@ -25,7 +29,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(TheorySuite.class);
 
-	private ConcurrentHashMap<FrameworkMethod, Description> descriptions = new ConcurrentHashMap<>();
+	private Map<FrameworkMethod, Description> descriptions;
 
 	/**
 	 * currently reuses some of the implementation of the default theories
@@ -33,12 +37,20 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 	 */
 	private TheoriesWrapper embeddedRunner;
 
-	private List<FrameworkMethod> allMethodsWithAllArgs = null;
+	private List<FrameworkMethod> allMethodsWithAllArgs;
 
 	private InitializationError initFail = null;
 
 	private Description suiteDescription;
 
+	private Map<Method, AssumptionsFailureCounter> checksByMethod;
+
+	/**
+	 * Instantiates a new theory suite.
+	 *
+	 * @param testClass the test class
+	 * @throws InitializationError if illegal annotations found
+	 */
 	public TheorySuite(Class<?> testClass) throws InitializationError {
 		super(testClass);
 
@@ -77,57 +89,29 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		return allMethodsWithAllArgs;
 	}
 
-	/**
-	 * Initialise all data members. Needed as a lot of work gets done before
-	 * constructor completes.
-	 */
-	private void init() {
-		suiteDescription = Description.createSuiteDescription(getTestClass().getJavaClass());
-		allMethodsWithAllArgs = new ArrayList<>();
-		descriptions = new ConcurrentHashMap<>();
-	}
+	@Override
+	protected void runChild(final FrameworkMethod fm, RunNotifier notifier) {
 
-	private void recordNonTheoryCase(FrameworkMethod fm) {
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("non-theory test {}", fm);
+		if (checksByMethod.containsKey(fm.getMethod())) {
+			AssumptionsFailureCounter listener = checksByMethod.get(fm
+					.getMethod());
+
+			notifier.addListener(listener);
+			try {
+				super.runChild(fm, notifier);
+			} finally {
+				if (!listener.isWithinLimit()) {
+					MethodWithArguments mwa = (MethodWithArguments) fm;
+					notifier.fireTestFailure(new Failure(
+							describeChild(mwa.getParent()),
+							new AssertionError(
+									"Never found parameters that satisfied method assumptions.")));
+				}
+				notifier.removeListener(listener);
+			}
+		} else {
+			super.runChild(fm, notifier);
 		}
-		allMethodsWithAllArgs.add(fm);
-		Description desc = Description.createTestDescription(
-				suiteDescription.getTestClass(), fm.getName());
-		suiteDescription.addChild(desc);
-
-		descriptions.put(fm, desc);
-
-	}
-
-	private void recordTheoryCase(TheoriesWrapper runner, FrameworkMethod fm) {
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("theory {}", fm);
-		}
-
-		Description methodDescription = Description.createSuiteDescription(fm
-				.getName());
-		suiteDescription.addChild(methodDescription);
-		Collection<MethodWithArguments> methodCases = runner
-				.computeTestMethodsWithArgs(fm);
-		recordCases(methodDescription, methodCases);
-
-	}
-
-	private void recordCases(Description methodDescription,
-			Collection<MethodWithArguments> methodCases) {
-		allMethodsWithAllArgs.addAll(methodCases);
-
-		for (MethodWithArguments testCase : methodCases) {
-			Description testDescription = Description.createTestDescription(suiteDescription.getTestClass(),
-					testCase.getName());
-
-			methodDescription.addChild(testDescription);
-			descriptions.put(testCase, testDescription);
-		}
-
 	}
 
 	@Override
@@ -141,6 +125,77 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		assert descriptions.containsKey(method);
 
 		return descriptions.get(method);
+
+	}
+
+	/**
+	 * Initialise all data members. Needed as a lot of work gets done before
+	 * constructor completes.
+	 */
+	private void init() {
+		suiteDescription = Description.createSuiteDescription(getTestClass()
+				.getJavaClass());
+		allMethodsWithAllArgs = new ArrayList<>();
+		descriptions = new ConcurrentHashMap<>();
+		checksByMethod = new ConcurrentHashMap<>();
+	}
+
+	/**
+	 * record everything for a simple test.
+	 *
+	 * @param fm
+	 *            the framework method
+	 */
+	private void recordNonTheoryCase(FrameworkMethod fm) {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("non-theory test {}", fm);
+		}
+		allMethodsWithAllArgs.add(fm);
+		Description desc = Description.createTestDescription(
+				suiteDescription.getTestClass(), fm.getName());
+		suiteDescription.addChild(desc);
+
+		descriptions.put(fm, desc);
+
+	}
+
+	/**
+	 * Record theory case.
+	 *
+	 * @param runner
+	 *            the runner
+	 * @param fm
+	 *            the fm
+	 */
+	private void recordTheoryCase(TheoriesWrapper runner, FrameworkMethod fm) {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("theory {}", fm);
+		}
+
+		Description methodDescription = Description.createSuiteDescription(fm
+				.getName());
+		descriptions.put(fm, methodDescription);
+
+		suiteDescription.addChild(methodDescription);
+		Collection<MethodWithArguments> methodCases = runner
+				.computeTestMethodsWithArgs(fm);
+		recordCases(methodDescription, methodCases);
+
+		checksByMethod.put(fm.getMethod(), new AssumptionsFailureCounter(
+				methodCases.size()));
+	}
+
+	private void recordCases(Description methodDescription,
+			Collection<MethodWithArguments> methodCases) {
+		allMethodsWithAllArgs.addAll(methodCases);
+
+		for (MethodWithArguments testCase : methodCases) {
+			Description testDescription = Description.createTestDescription(
+					suiteDescription.getTestClass(), testCase.getName());
+
+			methodDescription.addChild(testDescription);
+			descriptions.put(testCase, testDescription);
+		}
 
 	}
 
