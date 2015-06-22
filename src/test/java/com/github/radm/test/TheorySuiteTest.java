@@ -2,15 +2,16 @@ package com.github.radm.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.theories.Theory;
+import org.junit.runner.Computer;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
-import org.junit.runner.RunWith;
+import org.junit.runner.Runner;
+import org.junit.runners.model.RunnerBuilder;
 
 import com.github.radm.TheorySuite;
 
@@ -21,27 +22,24 @@ import com.github.radm.TheorySuite;
  */
 public class TheorySuiteTest {
 
-	@RunWith(TheorySuite.class)
+	public static final Computer runSelect = new CompterSaysRunWithTheorySuite();
+
 	public static class ValidTest {
 		@Test
 		public void simplePassingTest() {
 			assertTrue(true);
 		}
-		@Test
-		public void simpleFailingTest() {
-            fail();
-		}
 
 		@Theory
-		public void simplePassingTheory(boolean value) {
-			assertTrue(value || !value);
+		public void simpleFailingTheory(boolean value) {
+			assertTrue(value);
 		}
 	}
 
 	@Test
 	public void simpleValidTest()  {
-        Result result = JUnitCore.runClasses(ValidTest.class);
-        assertEquals(4, result.getRunCount());
+        Result result = JUnitCore.runClasses(runSelect, ValidTest.class);
+        assertEquals(3, result.getRunCount());
         assertEquals(1, result.getFailureCount());
         assertEquals(0, result.getIgnoreCount());
 
@@ -49,7 +47,6 @@ public class TheorySuiteTest {
 
 	}
 
-	@RunWith(TheorySuite.class)
 	public static class BeforeAndAfter {
 
 		private boolean ok = false;
@@ -74,15 +71,14 @@ public class TheorySuiteTest {
 
 	@Test
 	public void beforeAndAfter()  {
-        Result result = JUnitCore.runClasses(BeforeAndAfter.class);
+        Result result = JUnitCore.runClasses(runSelect, BeforeAndAfter.class);
         assertEquals(1, result.getRunCount());
         assertEquals(0, result.getFailureCount());
         assertEquals(0, result.getIgnoreCount());
 	}
 
-	@RunWith(TheorySuite.class)
 	public static class InvalidTest {
-		@Test
+		@Theory
 		private int invalidTest() {
 			return -1;
 		}
@@ -91,11 +87,22 @@ public class TheorySuiteTest {
 
 	@Test
 	public void checksForInvalidTest()  {
-        Result result = JUnitCore.runClasses(InvalidTest.class);
-        assertEquals(3, result.getRunCount());
-        assertEquals(3, result.getFailureCount());
+        Result result = JUnitCore.runClasses(runSelect, InvalidTest.class);
+        assertEquals(1, result.getRunCount());
+        assertEquals(1, result.getFailureCount());
         assertEquals(0, result.getIgnoreCount());
 
         result.getFailures().forEach(f -> assertTrue(f.toString(), f.toString().contains("ethod")));
+	}
+
+
+	public static class CompterSaysRunWithTheorySuite extends Computer {
+
+		@Override
+		protected Runner getRunner(RunnerBuilder builder, Class<?> testClass)
+				throws Throwable {
+			return new TheorySuite(testClass);
+		}
+
 	}
 }

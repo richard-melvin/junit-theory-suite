@@ -60,7 +60,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		TheoriesWrapper runner = getEmbeddedRunner();
 
 		if (runner == null) {
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		}
 
 		if (allMethodsWithAllArgs == null) {
