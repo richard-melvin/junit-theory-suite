@@ -5,7 +5,7 @@ This tutorial walks through some examples of using JUnit theories to effectively
 The Java 8 `java.time` api is used as the code to be tested. Not because it needs testing,
 but because calendar handling is a rich source of special cases and glitches. In practise, real tests would more likely be of code that used that api.
 
-The full source code for these examples is [here](src/test/java/com/github/radm/theories/test/ExampleTest.java)
+The full source code for these examples is [here](../src/test/java/com/github/radm/theories/test/ExampleTest.java)
 
 The examples rely on Java 8 and junit 4.12.
 
@@ -67,11 +67,8 @@ When a theory has multiple arguments, all possible combinations of arguments are
 
 	@Theory
 	public void endOfMonthAlwaysMatchesMonthLength(Year year, Month month) {
-
 		LocalDate atEndOfMonth = year.atMonth(month).atEndOfMonth();
-
 		assertEquals(month.minLength(), atEndOfMonth.getDayOfMonth());
-
 	}
 ```
 
@@ -81,9 +78,7 @@ The above code will be executed for every combination of year and month; 240 tes
 
 	@Theory
 	public void endOfMonthAlwaysWithinRange(Year year, Month month) {
-
 		LocalDate atEndOfMonth = year.atMonth(month).atEndOfMonth();
-
 		assertTrue(month.maxLength() >= atEndOfMonth.getDayOfMonth());
 		assertTrue(month.minLength() <= atEndOfMonth.getDayOfMonth());
 
@@ -103,12 +98,9 @@ Sometimes, some of the datapoints specified for a test in general are not applic
 
 	@Theory
 	public void previousDayBySubtraction(Year year, int monthDay) {
-
 		YearMonth febForYear = year.atMonth(Month.FEBRUARY);
 		assumeTrue(monthDay <= febForYear.lengthOfMonth());
-
 		DayOfWeek day = febForYear.atDay(monthDay).getDayOfWeek();
-
 		assertTrue(febForYear.atDay(monthDay).minusDays(1).getDayOfWeek() == day
 				.minus(1));
 	}
