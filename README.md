@@ -8,7 +8,7 @@ junit-theory-suite is a simple library that replaces the default [JUnit](https:/
 one that treats each individual combination of parameters as a distinct test case.
 
 ```java
-import com.github.radm.TheorySuite;
+import com.github.radm.theories.TheorySuite;
 
 @RunWith(TheorySuite.class)
 public class ExampleTest {
@@ -33,10 +33,10 @@ public class ExampleTest {
 will produce junit XML results:
 
 ```xml
-  <testcase classname="com.github.radm.test.ExampleTest" name="theoryOnYearOnly(1995)" time="0"/>
-  <testcase classname="com.github.radm.test.ExampleTest" name="theoryOnYearOnly(1996)" time="0"/>
-  <testcase classname="com.github.radm.test.ExampleTest" name="theoryOnYearOnly(1997)" time="0"/>
-  <testcase classname="com.github.radm.test.ExampleTest" name="theoryOnYearOnly(1998)" time="0.001"/>
+  <testcase classname="com.github.radm.theories.test.ExampleTest" name="theoryOnYearOnly(1995)" time="0"/>
+  <testcase classname="com.github.radm.theories.test.ExampleTest" name="theoryOnYearOnly(1996)" time="0"/>
+  <testcase classname="com.github.radm.theories.test.ExampleTest" name="theoryOnYearOnly(1997)" time="0"/>
+  <testcase classname="com.github.radm.theories.test.ExampleTest" name="theoryOnYearOnly(1998)" time="0.001"/>
 ```
 
 The individual test cases are also visible in IDE test runners such as Eclipse.

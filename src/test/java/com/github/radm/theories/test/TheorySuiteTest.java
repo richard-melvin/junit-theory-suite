@@ -1,4 +1,4 @@
-package com.github.radm.test;
+package com.github.radm.theories.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -21,7 +21,7 @@ import org.junit.runner.notification.RunListener;
 import org.junit.runners.model.RunnerBuilder;
 import org.mockito.Mockito;
 
-import com.github.radm.TheorySuite;
+import com.github.radm.theories.TheorySuite;
 
 /**
  * unit test for TheorySuite.

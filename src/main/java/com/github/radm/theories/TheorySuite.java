@@ -1,4 +1,4 @@
-package com.github.radm;
+package com.github.radm.theories;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package com.github.radm;
+package com.github.radm.theories;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Simple wrapper to allow reuse of validation logic.
  */
-public class TheoriesWrapper extends Theories {
+class TheoriesWrapper extends Theories {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(TheoriesWrapper.class);
@@ -28,7 +28,7 @@ public class TheoriesWrapper extends Theories {
 	}
 
 	@Override
-	protected List<FrameworkMethod> computeTestMethods() {
+	public List<FrameworkMethod> computeTestMethods() {
 		return super.computeTestMethods();
 	}
 

@@ -1,4 +1,4 @@
-package com.github.radm.test;
+package com.github.radm.theories.test;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
@@ -20,10 +20,10 @@ import org.junit.experimental.theories.Theory;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 
-import com.github.radm.TheorySuite;
+import com.github.radm.theories.TheorySuite;
 
 /**
- * Sample test to demonstrate the use of {@link com.github.radm.TheorySuite}
+ * Sample test to demonstrate the use of {@link com.github.radm.theories.TheorySuite}
  * runner.
  */
 @RunWith(TheorySuite.class)
@@ -96,7 +96,7 @@ public class ExampleTest {
 
 	/**
 	 * The {@link org.junit.rules.TestName} rule can be used to find the name of
-	 * the currently running test. When the {@link com.github.radm.TheorySuite}
+	 * the currently running test. When the {@link com.github.radm.theories.TheorySuite}
 	 * runner is used in a theory, this name contains the argument values used
 	 * in the current test case.
 	 */
