@@ -26,7 +26,9 @@ course the right thing to do if the two depend on each other, as above.
 
 ## Cover multiple test cases with a single Theory
 
-In JUnit, the `Theory` annotation marks a single test function as supporting multiple test cases; the details of the test data are passed as arguments.
+One way of defining multiple related tests cases is to use a parameterised test runner; theories are an alternative that is both more concise and more powerful.
+
+In JUnit, the `Theory` annotation marks a single test function as supporting multiple test cases; the details of the test data are passed as arguments directly to the test.
 
 ```java
 
@@ -42,7 +44,13 @@ In JUnit, the `Theory` annotation marks a single test function as supporting mul
 		}
 	}
 ```
-The principle of a theory is that it should pass for any argument value. So, unlike the previous example, it should't have any logic in it specific to any specific test.
+The principle of a theory is that it should pass for any argument value. So, unlike the previous example, it should
+not have any logic in it specific to any one test case. Ideally you would test it with every possible value, in
+practise, given you presumably want your tests to complete within the lifetime of the universe, you have to specify the
+set of actual values it will be tested on.
+
+The most straightforward way to do that is
+with data members (or methods) of the test class annotated with `DataPoint` or `DataPoints`.
 
 ```java
 
@@ -51,12 +59,17 @@ The principle of a theory is that it should pass for any argument value. So, unl
 			.map(Year::of).collect(Collectors.toList());
 ```
 
-The most straightforward way to specify the actual range of values the theory should be tested with is
-with data members (or methods) of the test class annotated with `DataPoint` or `DataPoints`. The above example uses Java 8 streams to build a list of the years 1995 to 2015. The theory is then tested for every year in that range, where obviously it should always pass.
+The above example uses Java 8 streams to build a list of the years 1995 to 2015. The theory is then tested for every year in that range, where obviously it should always pass.
 
 By default, datapoints are matched to arguments based on type; for `Datapoint` it should be the same type, for `Datapoints` is should be a collection or array of argument values.
 
-Another way of doing a similar thing is to use a parameterised test runner; however theories are both more concise and more powerful.
+Named datapoint sets are also supported:
+
+	@DataPoints("thisCentury")
+	public static List<Year> years = IntStream.range(2000, 2100).boxed()
+			.map(Year::of).collect(Collectors.toList());
+
+These can be tied to a particular test argument by a `FromDataPoints` annotation with corresponding name.
 
 
 ## Theories with multiple arguments
