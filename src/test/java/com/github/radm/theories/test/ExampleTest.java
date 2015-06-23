@@ -36,14 +36,14 @@ public class ExampleTest {
 	public static int[] monthDays = IntStream.range(1, 31).toArray();
 
 	@DataPoints
-	public static List<Year> years = IntStream.range(1995, 1999).boxed()
+	public static List<Year> years = IntStream.range(1995, 2001).boxed()
 			.map(Year::of).collect(Collectors.toList());
 
 	/**
 	 * Simple tests cases take no arguments.
 	 */
 	@Test
-	public void simpleTest() {
+	public void twentyTwelveIsLeapYear() {
 		assertTrue(Year.of(2012).isLeap());
 	}
 
@@ -53,7 +53,7 @@ public class ExampleTest {
 	 * type.
 	 */
 	@Theory
-	public void theoryOnYearOnly(Year year) {
+	public void leapYearsHaveMoreDaysInFebruary(Year year) {
 		if (year.isLeap()) {
 			assertEquals(Month.FEBRUARY.maxLength(),
 					year.atMonth(Month.FEBRUARY).lengthOfMonth());
@@ -70,7 +70,7 @@ public class ExampleTest {
 	 * the assertion to use '==' to have it fail on one case out of 48.
 	 */
 	@Theory
-	public void theoryOnYearAndMonth(Year year, Month month) {
+	public void endOfMonthAlwaysWithinRange(Year year, Month month) {
 
 		LocalDate atEndOfMonth = year.atMonth(month).atEndOfMonth();
 
@@ -84,11 +84,12 @@ public class ExampleTest {
 	 * {@link Assume.assumeTrue}.
 	 */
 	@Theory
-	public void theoryOnYearAndWeekday(Year year, int monthDay, DayOfWeek day) {
+	public void previousDayBySubtraction(Year year, int monthDay) {
 
 		YearMonth febForYear = year.atMonth(Month.FEBRUARY);
 		assumeTrue(monthDay <= febForYear.lengthOfMonth());
-		assumeTrue(febForYear.atDay(monthDay).getDayOfWeek() == day);
+
+		DayOfWeek day = febForYear.atDay(monthDay).getDayOfWeek();
 
 		assertTrue(febForYear.atDay(monthDay).minusDays(1).getDayOfWeek() == day
 				.minus(1));
