@@ -21,6 +21,12 @@
    <scope>compile</scope>
   </dependency>
   <dependency>
+   <!--Junit extensions; need this to resolve https://github.com/junit-team/junit/issues/64 -->
+   <groupId>org.junit.contrib</groupId>
+   <artifactId>junit-theories</artifactId>
+   <version>4.12</version>
+  </dependency>
+  <dependency>
    <!-- Logging API -->
    <groupId>org.slf4j</groupId>
    <artifactId>slf4j-api</artifactId>

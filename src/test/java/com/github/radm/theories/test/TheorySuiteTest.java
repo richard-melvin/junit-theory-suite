@@ -6,13 +6,20 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.experimental.theories.Theory;
+import org.junit.contrib.theories.DataPoints;
+import org.junit.contrib.theories.FromDataPoints;
+import org.junit.contrib.theories.Theory;
 import org.junit.runner.Computer;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -200,6 +207,55 @@ public class TheorySuiteTest {
         verify(listener, times(1)).testFailure(Mockito.any());
 
 	}
+
+
+	public static class GenericsTest {
+
+		@DataPoints public static List<Integer> l1 = IntStream.range(0, 23).boxed().collect(Collectors.toList());
+		@DataPoints public static List<Long> l2 = LongStream.range(900, 923).boxed().collect(Collectors.toList());
+
+		@Theory
+		public void checkGenerics(int i, long l) {
+			assertTrue(l > i);
+		}
+	}
+
+	@Test
+	public void canIdentifyArgsByGenericType() throws Exception  {
+
+		RunListener listener = runTestWithMockListener(GenericsTest.class);
+
+        verify(listener, times(23 * 23)).testStarted(Mockito.any());
+        verify(listener, times(23 * 23)).testFinished(Mockito.any());
+        verify(listener, times(0)).testAssumptionFailure(Mockito.any());
+        verify(listener, times(0)).testFailure(Mockito.any());
+
+	}
+
+
+	public static class NamedDataTest {
+
+		@DataPoints("l1") public static List<Integer> l1 = IntStream.range(0, 25).boxed().collect(Collectors.toList());
+		@DataPoints("l2") public static List<Integer> l2 = IntStream.range(400, 430).boxed().collect(Collectors.toList());
+
+		@Theory
+		public void checkGenerics(@FromDataPoints("l1") int i, @FromDataPoints("l2") int l) {
+			assertTrue(l > i);
+		}
+	}
+
+	@Test
+	public void canIdentifyArgsByName() throws Exception  {
+
+		RunListener listener = runTestWithMockListener(NamedDataTest.class);
+
+        verify(listener, times(25 * 30)).testStarted(Mockito.any());
+        verify(listener, times(25 * 30)).testFinished(Mockito.any());
+        verify(listener, times(0)).testAssumptionFailure(Mockito.any());
+        verify(listener, times(0)).testFailure(Mockito.any());
+
+	}
+
 
 
 	private RunListener runTestWithMockListener(Class<?> testCase) {

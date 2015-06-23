@@ -3,12 +3,11 @@ package com.github.radm.theories;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.junit.experimental.theories.Theory;
+import org.junit.contrib.theories.Theory;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
@@ -73,7 +72,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		TheoriesWrapper runner = getEmbeddedRunner();
 
 		if (runner == null) {
-			return Collections.emptyList();
+			return super.computeTestMethods();
 		}
 
 		if (allMethodsWithAllArgs == null) {

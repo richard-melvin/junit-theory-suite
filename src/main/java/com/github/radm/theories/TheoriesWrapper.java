@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.experimental.theories.PotentialAssignment;
-import org.junit.experimental.theories.Theories;
-import org.junit.experimental.theories.internal.Assignments;
+import org.junit.contrib.theories.PotentialAssignment;
+import org.junit.contrib.theories.Theories;
+import org.junit.contrib.theories.internal.Assignments;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.slf4j.Logger;
@@ -42,12 +42,12 @@ class TheoriesWrapper extends Theories {
 	public Collection<MethodWithArguments> computeTestMethodsWithArgs(
 			FrameworkMethod fm) {
 
-		Assignments allUnassigned = Assignments.allUnassigned(fm.getMethod(),
-				getTestClass());
-
-		testsCalls.clear();
 
 		try {
+			Assignments allUnassigned = Assignments.allUnassigned(fm.getMethod(),
+					getTestClass());
+
+			testsCalls.clear();
 			expand(fm, allUnassigned);
 		} catch (Throwable e) {
 			Assert.fail("Failure while collecting arguments to " + fm.getName()
@@ -62,7 +62,7 @@ class TheoriesWrapper extends Theories {
 
 		if (assignments.isComplete()) {
 			MethodWithArguments testCall = new MethodWithArguments(
-					fm.getMethod(), assignments.getAllArguments());
+					fm.getMethod(), assignments.getMethodArguments());
 
 			LOG.trace("Identified test case {}", testCall);
 

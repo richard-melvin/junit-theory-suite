@@ -15,8 +15,8 @@ import java.util.stream.IntStream;
 import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.experimental.theories.DataPoints;
-import org.junit.experimental.theories.Theory;
+import org.junit.contrib.theories.DataPoints;
+import org.junit.contrib.theories.Theory;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 
@@ -130,5 +130,6 @@ public class ExampleTest {
 		assertTrue(testName.getMethodName().contains(day.toString()));
 
 	}
+
 
 }
