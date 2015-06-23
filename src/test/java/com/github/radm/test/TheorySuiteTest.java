@@ -7,8 +7,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.Computer;
@@ -147,6 +149,31 @@ public class TheorySuiteTest {
         verify(listener, times(2)).testFinished(Mockito.any());
         verify(listener, times(2)).testAssumptionFailure(Mockito.any());
         verify(listener, times(1)).testFailure(Mockito.any());
+
+	}
+
+	public static class IgnoredTests {
+		@Theory
+		@Ignore
+		public void booleanTheory(boolean value) {
+			assertTrue(value);
+		}
+		@Test
+		@Ignore
+		public void ignored() {
+			Assert.fail();
+		}
+	}
+
+	@Test
+	public void ignoredTestsIgnored() throws Exception  {
+
+		RunListener listener = runTestWithMockListener(IgnoredTests.class);
+
+        verify(listener, times(0)).testStarted(Mockito.any());
+        verify(listener, times(0)).testFinished(Mockito.any());
+        verify(listener, times(0)).testAssumptionFailure(Mockito.any());
+        verify(listener, times(0)).testFailure(Mockito.any());
 
 	}
 
