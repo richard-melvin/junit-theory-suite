@@ -27,10 +27,9 @@ public class MethodWithArguments extends FrameworkMethod {
 	@Override
 	public Object invokeExplosively(Object target, Object... params)
 			throws Throwable {
-		if (LOG.isTraceEnabled())
-		{
-			LOG.trace("Executing {}", this);
-		}
+
+		LOG.trace("Executing {}", this);
+
 		return super.invokeExplosively(target, args);
 	}
 

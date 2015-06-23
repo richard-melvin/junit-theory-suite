@@ -147,9 +147,8 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 	 *            the framework method
 	 */
 	private void recordNonTheoryCase(FrameworkMethod fm) {
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("non-theory test {}", fm);
-		}
+		LOG.debug("non-theory test {}", fm);
+
 		allMethodsWithAllArgs.add(fm);
 		Description desc = Description.createTestDescription(
 				suiteDescription.getTestClass(), fm.getName());
@@ -168,9 +167,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 	 *            the fm
 	 */
 	private void recordTheoryCase(TheoriesWrapper runner, FrameworkMethod fm) {
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("theory {}", fm);
-		}
+		LOG.debug("theory {}", fm);
 
 		Description methodDescription = Description.createSuiteDescription(fm
 				.getName());

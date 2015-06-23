@@ -2,9 +2,7 @@ package com.github.radm;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.experimental.theories.PotentialAssignment;
@@ -23,8 +21,7 @@ public class TheoriesWrapper extends Theories {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(TheoriesWrapper.class);
 
-	private Set<MethodWithArguments> testsCalls = new HashSet<>();
-	private List<MethodWithArguments> testsCallsInOrder = new ArrayList<>();
+	private List<MethodWithArguments> testsCalls = new ArrayList<>();
 
 	public TheoriesWrapper(Class<?> klass) throws InitializationError {
 		super(klass);
@@ -38,7 +35,8 @@ public class TheoriesWrapper extends Theories {
 	/**
 	 * Compute the set of methods with known argument values.
 	 *
-	 * @param fm the framework method
+	 * @param fm
+	 *            the framework method
 	 * @return the collection
 	 */
 	public Collection<MethodWithArguments> computeTestMethodsWithArgs(
@@ -48,7 +46,6 @@ public class TheoriesWrapper extends Theories {
 				getTestClass());
 
 		testsCalls.clear();
-		testsCallsInOrder.clear();
 
 		try {
 			expand(fm, allUnassigned);
@@ -57,24 +54,19 @@ public class TheoriesWrapper extends Theories {
 					+ ":" + e.toString());
 		}
 
-		return testsCallsInOrder;
+		return testsCalls;
 	}
 
 	private void expand(FrameworkMethod fm, Assignments assignments)
 			throws Throwable {
 
 		if (assignments.isComplete()) {
-			MethodWithArguments testCall = new MethodWithArguments(fm.getMethod(),
-					assignments.getAllArguments());
+			MethodWithArguments testCall = new MethodWithArguments(
+					fm.getMethod(), assignments.getAllArguments());
 
-			if (!testsCalls.contains(testCall)) {
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("Identified test case {}", testCall);
-				}
-				testsCalls.add(testCall);
-				testsCallsInOrder.add(testCall);
-			}
+			LOG.trace("Identified test case {}", testCall);
+
+			testsCalls.add(testCall);
 			return;
 		}
 
