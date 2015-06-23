@@ -39,7 +39,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 	private List<FrameworkMethod> allMethodsWithAllArgs;
 
-	private InitializationError initFail = null;
+	private List<Throwable> initFail;
 
 	private Description suiteDescription;
 
@@ -54,8 +54,9 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 	public TheorySuite(Class<?> testClass) throws InitializationError {
 		super(testClass);
 
+		LOG.debug("Constructor init complete");
 		if (initFail != null) {
-			throw initFail;
+			throw new InitializationError(initFail);
 		}
 
 	}
@@ -176,10 +177,19 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		suiteDescription.addChild(methodDescription);
 		Collection<MethodWithArguments> methodCases = runner
 				.computeTestMethodsWithArgs(fm);
-		recordCases(methodDescription, methodCases);
+		if (methodCases.isEmpty())
+		{
+			reportError(new Error("No test cases found for " + fm + "; missing annotations?"));
+		}
+		else
+		{
+			recordCases(methodDescription, methodCases);
 
-		checksByMethod.put(fm.getMethod(), new AssumptionsFailureCounter(
-				methodCases.size()));
+			checksByMethod.put(fm.getMethod(), new AssumptionsFailureCounter(
+					methodCases.size()));
+
+		}
+
 	}
 
 	private void recordCases(Description methodDescription,
@@ -208,11 +218,23 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 				embeddedRunner = new TheoriesWrapper(getTestClass()
 						.getJavaClass());
 			} catch (InitializationError e) {
-				initFail = e;
+				initFail = e.getCauses();
 			}
 		}
 
 		return embeddedRunner;
 	}
 
+
+	private void reportError(Throwable t)
+	{
+		LOG.debug(t.toString());
+
+		if (initFail == null)
+		{
+			initFail = new ArrayList<>();
+		}
+
+		initFail.add(t);
+	}
 }

@@ -8,8 +8,8 @@
 		</encoder>
 	</appender>
 
-	<logger name="com.github.radm" level="INFO" />
-	<logger name="com.github.radm.test" level="INFO" />
+	<logger name="com.github.radm.theories" level="DEBUG" />
+	<logger name="com.github.radm.theories.test" level="INFO" />
 	<root level="info">
 		<appender-ref ref="STDOUT" />
 	</root>

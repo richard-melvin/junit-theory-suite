@@ -33,10 +33,14 @@ public class ExampleTest {
 	public TestName testName = new TestName();
 
 	@DataPoints
-	public static int[] monthDays = IntStream.range(1, 31).toArray();
+	public static int[] fullMonthDays = IntStream.range(1, 31).toArray();
 
-	@DataPoints
+	@DataPoints("short")
 	public static List<Year> years = IntStream.range(1995, 2001).boxed()
+			.map(Year::of).collect(Collectors.toList());
+
+	@DataPoints("full")
+	public static List<Year> moreYears = IntStream.range(2001, 2030).boxed()
 			.map(Year::of).collect(Collectors.toList());
 
 	/**

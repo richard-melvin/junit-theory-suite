@@ -177,6 +177,31 @@ public class TheorySuiteTest {
 
 	}
 
+
+
+	public static class MissingDatapoints {
+		@Theory
+		public void intTheory(int value) {
+			assertTrue(value > 0);
+		}
+		@Test
+		public void passing() {
+		}
+	}
+
+	@Test
+	public void missingDataPointsFailsTest() throws Exception  {
+
+		RunListener listener = runTestWithMockListener(MissingDatapoints.class);
+
+        verify(listener, times(1)).testStarted(Mockito.any());
+        verify(listener, times(1)).testFinished(Mockito.any());
+        verify(listener, times(0)).testAssumptionFailure(Mockito.any());
+        verify(listener, times(1)).testFailure(Mockito.any());
+
+	}
+
+
 	private RunListener runTestWithMockListener(Class<?> testCase) {
 		RunListener listener = Mockito.mock(RunListener.class);
 		JUnitCore core = new JUnitCore();
