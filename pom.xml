@@ -4,7 +4,7 @@
  <modelVersion>4.0.0</modelVersion>
  <groupId>com.github.radm</groupId>
  <artifactId>junit-theory-suite</artifactId>
- <version>0.4.0</version>
+ <version>0.4.1</version>
  <name>Junit Theory Suite runner</name>
  <properties>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -24,7 +24,7 @@
    <!--Junit extensions; need this to resolve https://github.com/junit-team/junit/issues/64 -->
    <groupId>org.junit.contrib</groupId>
    <artifactId>junit-theories</artifactId>
-   <version>4.12</version>
+   <version>5.0-alpha-3</version>
   </dependency>
   <dependency>
    <!-- Logging API -->
@@ -45,6 +45,19 @@
    <groupId>org.mockito</groupId>
    <artifactId>mockito-core</artifactId>
    <version>1.10.19</version>
+   <scope>test</scope>
+  </dependency>
+  <dependency>
+   <!-- Quickcheck for testing -->
+   <groupId>com.pholser</groupId>
+   <artifactId>junit-quickcheck-core</artifactId>
+   <version>0.5-alpha-3</version>
+   <scope>test</scope>
+  </dependency>
+  <dependency>
+   <groupId>com.pholser</groupId>
+   <artifactId>junit-quickcheck-generators</artifactId>
+   <version>0.5-alpha-3</version>
    <scope>test</scope>
   </dependency>
  </dependencies>

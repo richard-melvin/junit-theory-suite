@@ -61,12 +61,17 @@ To use it, simply:
 	<dependency>
 	    <groupId>com.github.richard-melvin</groupId>
 	    <artifactId>junit-theory-suite</artifactId>
-	    <version>v0.4.0</version>
+	    <version>v0.5.0</version>
+	    <scope>test</scope>
 	</dependency>
 
 ```
 
 This uses [jitpack.io](https://jitpack.io/) as a lightweight alternative to releasing to maven central.
+
+## junit-theory-suite
+
+junit-theory-suite uses a version of the JUnit theories runner that has been modified to respect generics on theory parameter types, as described [here](https://github.com/junit-team/junit/issues/64). The classes that comprise this rendition of the JUnit theories runner are packaged as org.junit.contrib.theories.*, rather than org.junit.experimental.theories.*. Be sure to use the contrib version of the runner, annotations, etc. with junit-theory-suite.
 
 ## Known differences to the standard theories runner
 

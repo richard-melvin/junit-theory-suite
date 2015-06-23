@@ -50,6 +50,7 @@ class TheoriesWrapper extends Theories {
 			testsCalls.clear();
 			expand(fm, allUnassigned);
 		} catch (Throwable e) {
+			LOG.warn("collecting arguments", e);
 			Assert.fail("Failure while collecting arguments to " + fm.getName()
 					+ ":" + e.toString());
 		}
