@@ -26,7 +26,7 @@ course the right thing to do if the two depend on each other, as above.
 
 ## Cover multiple test cases with a single Theory
 
-One test is rarely enough, and creating multiple similar tests by simple cut and paste
+One test is rarely enough, and creating multiple similar tests by simple cut and paste is little better.
 One way of defining multiple related tests cases is to use a
 [parameterised test runner](https://github.com/junit-team/junit/wiki/Parameterized-tests).
 JUnit [theories](https://github.com/junit-team/junit/wiki/Theories) are an alternative approach that is both more concise and more powerful.
