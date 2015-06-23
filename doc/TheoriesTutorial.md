@@ -48,7 +48,7 @@ _test cases_. The details of the test data are passed as arguments directly to t
 		}
 	}
 ```
-The idea of a theory is that it should pass for any possible argument value, just as a tst with no arguments should always pass.
+The idea of a theory is that it should pass for any possible argument value, just as a test with no arguments should always pass.
 So, unlike a simple test, it should not have any logic in it that is specific to any one test case.
 Ideally you would test it with every possible value. In practice, given you presumably want your tests to complete
 within the lifetime of the universe, you have to have use some means of specifying the actual set of values it will be tested on.
