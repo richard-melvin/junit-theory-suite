@@ -2,8 +2,8 @@
 
 This tutorial walks through some examples of using JUnit theories to effectively test complex code.
 
-The Java 8 `java.time` api is used as the code to be tested. Not because it needs testing,
-but because calendar handling is a rich source of special cases and glitches. In practise, real tests would more likely be of code that used that api.
+The Java 8 `java.time` api is used as the code to be tested. Not so much because it needs testing,
+but because calendar handling is a rich source of special cases and glitches. Real tests would more likely be of code that used that api.
 
 The full source code for these examples is [here](../src/test/java/com/github/radm/theories/test/ExampleTest.java)
 
@@ -26,9 +26,13 @@ course the right thing to do if the two depend on each other, as above.
 
 ## Cover multiple test cases with a single Theory
 
-One way of defining multiple related tests cases is to use a parameterised test runner; theories are an alternative that is both more concise and more powerful.
+One test is rarely enough, and creating multiple similar tests by simple cut and paste
+One way of defining multiple related tests cases is to use a
+[parameterised test runner](https://github.com/junit-team/junit/wiki/Parameterized-tests).
+JUnit [theories](https://github.com/junit-team/junit/wiki/Theories) are an alternative approach that is both more concise and more powerful.
 
-In JUnit, the `Theory` annotation marks a single test function as supporting multiple test cases; the details of the test data are passed as arguments directly to the test.
+In JUnit, the `Theory` annotation marks a single _test function_ as supporting multiple
+_test cases_. The details of the test data are passed as arguments directly to the test.
 
 ```java
 
@@ -44,13 +48,13 @@ In JUnit, the `Theory` annotation marks a single test function as supporting mul
 		}
 	}
 ```
-The principle of a theory is that it should pass for any argument value. So, unlike the previous example, it should
-not have any logic in it specific to any one test case. Ideally you would test it with every possible value, in
-practise, given you presumably want your tests to complete within the lifetime of the universe, you have to specify the
-set of actual values it will be tested on.
+The idea of a theory is that it should pass for any possible argument value, just as a tst with no arguments should always pass.
+So, unlike a simple test, it should not have any logic in it that is specific to any one test case.
+Ideally you would test it with every possible value. In practice, given you presumably want your tests to complete
+within the lifetime of the universe, you have to have use some means of specifying the actual set of values it will be tested on.
 
-The most straightforward way to do that is
-with data members (or methods) of the test class annotated with `DataPoint` or `DataPoints`.
+The most straightforward way to do that is with data members (or methods) of
+the test class annotated with `DataPoint` or `DataPoints`.
 
 ```java
 
@@ -85,7 +89,8 @@ When a theory has multiple arguments, all possible combinations of arguments are
 	}
 ```
 
-The above code will be executed for every combination of year and month; 240 test cases in 3 lines of code. It will pass for almost all those cases, but fail for February in leap years.	The corrected code is:
+The above code will be executed for every combination of year and month; 240 test cases in 3 lines of code.
+It will pass for almost all those cases, but fail for February in leap years. The corrected code is:
 
 ```java
 
@@ -98,7 +103,31 @@ The above code will be executed for every combination of year and month; 240 tes
 	}
 ```
 
-Another feature shown by the above example is that, as `Month` is an enum, no explicit `Datapoint` annotation was needed - it default to using all possible values. The same is true of boolean theory arguments.
+Another feature shown by the above example is that, as `Month` is an enum, no
+explicit `Datapoint` annotation was needed - it defaults to using all possible values.
+The same is true of boolean theory arguments.
+
+If a test has several arguments of the same type, the same value generation logic is applied to each such argument:
+
+```java
+
+	@Theory
+	public void yearOrderingMatchesDayOrdering(Year yearOne, Year yearTwo) {
+
+		assumeTrue(!yearOne.equals(yearTwo));
+
+		if (yearOne.compareTo(yearTwo) > 0)
+		{
+			assertTrue(yearOne.atDay(1).compareTo(yearTwo.atMonth(Month.DECEMBER).atEndOfMonth()) > 0);
+			assertTrue(yearOne.atMonth(Month.DECEMBER).atEndOfMonth().compareTo(yearTwo.atDay(1)) > 0);
+		}
+		else
+		{
+			assertTrue(yearOne.atDay(1).compareTo(yearTwo.atMonth(Month.DECEMBER).atEndOfMonth()) < 0);
+			assertTrue(yearOne.atMonth(Month.DECEMBER).atEndOfMonth().compareTo(yearTwo.atDay(1)) < 0);
+		}
+	}
+```
 
 ## Discarding test cases for a particular theory
 
@@ -120,5 +149,6 @@ Sometimes, some of the datapoints specified for a test in general are not applic
 
 ```
 
-In such cases, `Assume.assumeTrue` can be used to discard those points. Unlike other assertion methods, as long as some test cases pass the assumption, the overall test passes.
+In such cases, instead of fiddling with named datapoints, `Assume.assumeTrue` can be used to discard those points.
+Unlike other assertion methods, as long as some test cases pass the assumption, the overall test passes.
 

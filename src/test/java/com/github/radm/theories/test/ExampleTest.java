@@ -39,10 +39,6 @@ public class ExampleTest {
 	public static List<Year> years = IntStream.range(1995, 2001).boxed()
 			.map(Year::of).collect(Collectors.toList());
 
-	@DataPoints("full")
-	public static List<Year> moreYears = IntStream.range(2001, 2030).boxed()
-			.map(Year::of).collect(Collectors.toList());
-
 	/**
 	 * Simple tests cases take no arguments.
 	 */
@@ -97,6 +93,28 @@ public class ExampleTest {
 
 		assertTrue(febForYear.atDay(monthDay).minusDays(1).getDayOfWeek() == day
 				.minus(1));
+	}
+
+	/**
+	 * For two arguments of the same types, the same set of values is used for each.
+	 */
+	@Theory
+	public void yearOrderingMatchesDayOrdering(Year yearOne, Year yearTwo) {
+
+		assumeTrue(!yearOne.equals(yearTwo));
+
+		if (yearOne.compareTo(yearTwo) > 0)
+		{
+			assertTrue(yearOne.atDay(1).compareTo(yearTwo.atDay(1)) > 0);
+			assertTrue(yearOne.atDay(1).compareTo(yearTwo.atMonth(Month.DECEMBER).atEndOfMonth()) > 0);
+			assertTrue(yearOne.atMonth(Month.DECEMBER).atEndOfMonth().compareTo(yearTwo.atDay(1)) > 0);
+		}
+		else
+		{
+			assertTrue(yearOne.atDay(1).compareTo(yearTwo.atDay(1)) < 0);
+			assertTrue(yearOne.atDay(1).compareTo(yearTwo.atMonth(Month.DECEMBER).atEndOfMonth()) < 0);
+			assertTrue(yearOne.atMonth(Month.DECEMBER).atEndOfMonth().compareTo(yearTwo.atDay(1)) < 0);
+		}
 	}
 
 	/**

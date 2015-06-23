@@ -168,7 +168,6 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 	 *            the fm
 	 */
 	private void recordTheoryCase(TheoriesWrapper runner, FrameworkMethod fm) {
-		LOG.debug("theory {}", fm);
 
 		Description methodDescription = Description.createSuiteDescription(fm
 				.getName());
@@ -187,6 +186,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 			checksByMethod.put(fm.getMethod(), new AssumptionsFailureCounter(
 					methodCases.size()));
+			LOG.debug("theory {} has {} cases", fm, methodCases.size());
 
 		}
 
