@@ -47,8 +47,10 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 	/**
 	 * Instantiates a new theory suite.
 	 *
-	 * @param testClass the test class
-	 * @throws InitializationError if illegal annotations found
+	 * @param testClass
+	 *            the test class
+	 * @throws InitializationError
+	 *             if illegal annotations found
 	 */
 	public TheorySuite(Class<?> testClass) throws InitializationError {
 		super(testClass);
@@ -173,14 +175,13 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		descriptions.put(fm, methodDescription);
 
 		suiteDescription.addChild(methodDescription);
-		Collection<MethodWithArguments> methodCases = runner
-				.computeTestMethodsWithArgs(fm);
-		if (methodCases.isEmpty())
-		{
-			reportError(new Error("No test cases found for " + fm + "; missing annotations?"));
-		}
-		else
-		{
+
+		Collection<MethodWithArguments> methodCases = new ArgumentGenerator(
+				getTestClass(), fm).computeTestMethodsWithArgs();
+		if (methodCases.isEmpty()) {
+			reportError(new Error("No test cases found for " + fm
+					+ "; missing annotations?"));
+		} else {
 			recordCases(methodDescription, methodCases);
 
 			checksByMethod.put(fm.getMethod(), new AssumptionsFailureCounter(
@@ -224,13 +225,10 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		return embeddedRunner;
 	}
 
-
-	private void reportError(Throwable t)
-	{
+	private void reportError(Throwable t) {
 		LOG.debug(t.toString());
 
-		if (initFail == null)
-		{
+		if (initFail == null) {
 			initFail = new ArrayList<>();
 		}
 
