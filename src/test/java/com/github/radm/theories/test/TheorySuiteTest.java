@@ -24,8 +24,10 @@ import org.junit.runner.Computer;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.Runner;
+import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 import org.junit.runners.model.RunnerBuilder;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import com.github.radm.theories.TheorySuite;
@@ -65,7 +67,10 @@ public class TheorySuiteTest {
         assertEquals(1, result.getFailureCount());
         assertEquals(0, result.getIgnoreCount());
 
-        assertTrue(result.getFailures().get(0).getException() instanceof AssertionError);
+        Failure failure = result.getFailures().get(0);
+		assertTrue(failure.getException() instanceof AssertionError);
+
+		assertTrue(failure.getDescription().getDisplayName().startsWith("simpleFailingTheory(false)"));
 
 	}
 
@@ -257,6 +262,34 @@ public class TheorySuiteTest {
 	}
 
 
+	public static class DatapointFunctionThrows {
+		@Test
+		public void passing() {
+		}
+
+		@Theory
+		public void intTheory(int value) {
+			assertTrue(value > 0);
+		}
+		@DataPoints public static List<Integer> lf1() {
+			throw new NumberFormatException();
+		}
+
+	}
+
+	@Test
+	public void datapointFunctionThrowsException() throws Exception  {
+
+		RunListener listener = runTestWithMockListener(DatapointFunctionThrows.class);
+
+		ArgumentCaptor<Failure> argument = ArgumentCaptor.forClass(Failure.class);
+
+        verify(listener, times(1)).testFailure(argument.capture());
+
+        assertTrue(argument.getValue().toString(), argument.getValue().getException() instanceof NumberFormatException);
+	}
+
+
 
 	private RunListener runTestWithMockListener(Class<?> testCase) {
 		RunListener listener = Mockito.mock(RunListener.class);
@@ -265,6 +298,8 @@ public class TheorySuiteTest {
 		core.run(runSelect, testCase);
 		return listener;
 	}
+
+
 
 
 }

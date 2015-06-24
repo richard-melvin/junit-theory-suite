@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
 import org.junit.contrib.theories.ParameterSignature;
 import org.junit.contrib.theories.PotentialAssignment;
 import org.junit.runners.model.FrameworkMethod;
@@ -47,46 +46,37 @@ public class ArgumentGenerator {
 	 * @param fm
 	 *            the framework method
 	 * @return the collection
+	 * @throws Throwable if something goes wrong with test code calculating arguments
 	 */
-	public Collection<MethodWithArguments> computeTestMethodsWithArgs() {
-		try {
+	public Collection<MethodWithArguments> computeTestMethodsWithArgs() throws Throwable {
 
-			List<ParameterSignature> signatures = ParameterSignature
-					.signatures(testMethod.getMethod());
-			List<String> colNames = new ArrayList<>(signatures.stream()
-					.map(ParameterSignature::getName)
-					.collect(Collectors.toList()));
+		List<ParameterSignature> signatures = ParameterSignature
+				.signatures(testMethod.getMethod());
+		List<String> colNames = new ArrayList<>(signatures.stream()
+				.map(ParameterSignature::getName).collect(Collectors.toList()));
 
-			List<Iterable<Object>> allArgValues = new ArrayList<>(signatures.size());
-			for (ParameterSignature sig : signatures) {
-				List<PotentialAssignment> potentialsFor = finder
-						.potentialsFor(sig);
-				List<Object> argVal = new ArrayList<>(potentialsFor.size());
+		List<Iterable<Object>> allArgValues = new ArrayList<>(signatures.size());
+		for (ParameterSignature sig : signatures) {
+			List<PotentialAssignment> potentialsFor = finder.potentialsFor(sig);
+			List<Object> argVal = new ArrayList<>(potentialsFor.size());
 
-				for (PotentialAssignment pa : potentialsFor) {
-					argVal.add(pa.getValue());
-				}
-				allArgValues.add(argVal);
+			for (PotentialAssignment pa : potentialsFor) {
+				argVal.add(pa.getValue());
 			}
+			allArgValues.add(argVal);
+		}
 
-			ArgumentSet as = new ArgumentSet(colNames, allArgValues);
+		ArgumentSet as = new ArgumentSet(colNames, allArgValues);
 
-			for (Object[] rawArgs : as) {
+		for (Object[] rawArgs : as) {
 
-				assert rawArgs.length == testMethod.getMethod().getParameterCount();
-				MethodWithArguments testCall = new MethodWithArguments(
-						testMethod.getMethod(), rawArgs);
+			assert rawArgs.length == testMethod.getMethod().getParameterCount();
+			MethodWithArguments testCall = new MethodWithArguments(
+					testMethod.getMethod(), rawArgs);
 
-				LOG.trace("Identified test case {}", testCall);
+			LOG.trace("Identified test case {}", testCall);
 
-				testsCalls.add(testCall);
-			}
-
-			// expand(testMethod, allUnassigned);
-		} catch (Throwable e) {
-			LOG.warn("collecting arguments", e);
-			Assert.fail("Failure while collecting arguments to "
-					+ testMethod.getName() + ":" + e.toString());
+			testsCalls.add(testCall);
 		}
 
 		return testsCalls;

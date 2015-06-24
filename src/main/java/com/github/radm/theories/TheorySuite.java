@@ -93,6 +93,11 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 				} else {
 					recordTheoryCase(runner, fm);
 				}
+
+				if (initFail != null)
+				{
+					break;
+				}
 			}
 		}
 
@@ -122,11 +127,6 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		} else {
 			super.runChild(fm, notifier);
 		}
-	}
-
-	@Override
-	public int testCount() {
-		return computeTestMethods().size();
 	}
 
 	@Override
@@ -179,26 +179,30 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 	 */
 	private void recordTheoryCase(TheoriesWrapper runner, FrameworkMethod fm) {
 
-		Description methodDescription = Description.createSuiteDescription(fm
-				.getName());
-		descriptions.put(fm, methodDescription);
+		try {
+			Collection<MethodWithArguments> methodCases = new ArgumentGenerator(
+					finder, fm).computeTestMethodsWithArgs();
+			Description methodDescription = Description.createSuiteDescription(fm
+					.getName());
+			descriptions.put(fm, methodDescription);
 
-		suiteDescription.addChild(methodDescription);
+			suiteDescription.addChild(methodDescription);
+			if (methodCases.isEmpty()) {
+				reportError(new Error("No test cases found for " + fm
+						+ "; missing annotations?"));
+			} else {
+				recordCases(methodDescription, methodCases);
 
-		Collection<MethodWithArguments> methodCases = new ArgumentGenerator(
-				finder, fm).computeTestMethodsWithArgs();
-		if (methodCases.isEmpty()) {
-			reportError(new Error("No test cases found for " + fm
-					+ "; missing annotations?"));
-		} else {
-			recordCases(methodDescription, methodCases);
+				checksByMethod.put(fm.getMethod(), new AssumptionsFailureCounter(
+						methodCases.size()));
+				LOG.debug("theory {} has {} cases", fm, methodCases.size());
 
-			checksByMethod.put(fm.getMethod(), new AssumptionsFailureCounter(
-					methodCases.size()));
-			LOG.debug("theory {} has {} cases", fm, methodCases.size());
+			}
+		} catch (Throwable e) {
+			LOG.debug("collecting arguments", e);
 
+			reportError(e);
 		}
-
 	}
 
 	private void recordCases(Description methodDescription,
