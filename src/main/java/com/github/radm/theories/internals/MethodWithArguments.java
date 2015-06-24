@@ -1,4 +1,4 @@
-package com.github.radm.theories;
+package com.github.radm.theories.internals;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A test method with an expanded-out set of arguments ready to be run.
  */
-class MethodWithArguments extends FrameworkMethod {
+public class MethodWithArguments extends FrameworkMethod {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(MethodWithArguments.class);

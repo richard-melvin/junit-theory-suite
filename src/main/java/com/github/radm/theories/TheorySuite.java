@@ -17,6 +17,12 @@ import org.junit.runners.model.InitializationError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.radm.theories.internals.ArgumentGenerator;
+import com.github.radm.theories.internals.AssumptionsFailureCounter;
+import com.github.radm.theories.internals.MethodWithArguments;
+import com.github.radm.theories.internals.PotentialAssignmentFinder;
+import com.github.radm.theories.internals.TheoriesWrapper;
+
 /**
  * A TheorySuite is a JUnit test runner that understands all the test
  * annotations supported by the standard JUnit `Theories` runner. Unlike the
@@ -43,6 +49,8 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 	private Description suiteDescription;
 
 	private Map<Method, AssumptionsFailureCounter> checksByMethod;
+
+	private PotentialAssignmentFinder finder;
 
 	/**
 	 * Instantiates a new theory suite.
@@ -101,7 +109,6 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 			notifier.addListener(listener);
 			try {
 				super.runChild(fm, notifier);
-			} finally {
 				if (!listener.isWithinLimit()) {
 					MethodWithArguments mwa = (MethodWithArguments) fm;
 					notifier.fireTestFailure(new Failure(
@@ -109,6 +116,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 							new AssertionError(
 									"Never found parameters that satisfied method assumptions.")));
 				}
+			} finally {
 				notifier.removeListener(listener);
 			}
 		} else {
@@ -140,6 +148,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		allMethodsWithAllArgs = new ArrayList<>();
 		descriptions = new ConcurrentHashMap<>();
 		checksByMethod = new ConcurrentHashMap<>();
+		finder = new PotentialAssignmentFinder(getTestClass());
 	}
 
 	/**
@@ -161,12 +170,12 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 	}
 
 	/**
-	 * Record theory case.
+	 * Record everything for a theory.
 	 *
 	 * @param runner
 	 *            the runner
 	 * @param fm
-	 *            the fm
+	 *            the framework method
 	 */
 	private void recordTheoryCase(TheoriesWrapper runner, FrameworkMethod fm) {
 
@@ -177,7 +186,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		suiteDescription.addChild(methodDescription);
 
 		Collection<MethodWithArguments> methodCases = new ArgumentGenerator(
-				getTestClass(), fm).computeTestMethodsWithArgs();
+				finder, fm).computeTestMethodsWithArgs();
 		if (methodCases.isEmpty()) {
 			reportError(new Error("No test cases found for " + fm
 					+ "; missing annotations?"));

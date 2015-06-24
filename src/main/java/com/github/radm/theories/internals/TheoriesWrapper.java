@@ -1,4 +1,4 @@
-package com.github.radm.theories;
+package com.github.radm.theories.internals;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import org.junit.runners.model.InitializationError;
 /**
  * Simple wrapper to allow reuse of validation logic.
  */
-class TheoriesWrapper extends Theories {
+public class TheoriesWrapper extends Theories {
 
 	public TheoriesWrapper(Class<?> klass) throws InitializationError {
 		super(klass);

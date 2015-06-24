@@ -1,4 +1,4 @@
-package com.github.radm.theories;
+package com.github.radm.theories.internals;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -9,7 +9,7 @@ import org.junit.runner.notification.RunListener;
  * Counter of assumption failures.
  *
  */
-class AssumptionsFailureCounter extends RunListener {
+public class AssumptionsFailureCounter extends RunListener {
 
 
 	private AtomicInteger assumptionsFailed = new AtomicInteger();
