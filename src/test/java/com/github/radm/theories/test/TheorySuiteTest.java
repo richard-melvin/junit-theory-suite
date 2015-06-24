@@ -21,6 +21,7 @@ import org.junit.contrib.theories.DataPoints;
 import org.junit.contrib.theories.FromDataPoints;
 import org.junit.contrib.theories.Theory;
 import org.junit.runner.Computer;
+import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.Runner;
@@ -60,7 +61,7 @@ public class TheorySuiteTest {
 	}
 
 	@Test
-	public void simpleValidTest()  {
+	public void simpleValidTestResult()  {
 
         Result result = JUnitCore.runClasses(runSelect, ValidTest.class);
         assertEquals(3, result.getRunCount());
@@ -71,6 +72,30 @@ public class TheorySuiteTest {
 		assertTrue(failure.getException() instanceof AssertionError);
 
 		assertTrue(failure.getDescription().getDisplayName().startsWith("simpleFailingTheory(false)"));
+
+	}
+
+
+	@Test
+	public void simpleValidTestMocked() throws Exception  {
+
+		RunListener listener = runTestWithMockListener(ValidTest.class);
+
+		ArgumentCaptor<Description> argument = ArgumentCaptor.forClass(Description.class);
+
+        verify(listener, times(1)).testRunStarted(Mockito.any());
+        verify(listener, times(3)).testStarted(argument.capture());
+        verify(listener, times(3)).testFinished(Mockito.any());
+        verify(listener, times(0)).testAssumptionFailure(Mockito.any());
+        verify(listener, times(1)).testFailure(Mockito.any());
+
+
+        for (Description d : argument.getAllValues())
+        {
+        	assertTrue(d.getTestClass().equals(ValidTest.class));
+        	assertTrue(d.getChildren().isEmpty());
+
+        }
 
 	}
 
@@ -289,6 +314,30 @@ public class TheorySuiteTest {
         assertTrue(argument.getValue().toString(), argument.getValue().getException() instanceof NumberFormatException);
 	}
 
+
+
+	public static class LargeNumberOfArgs {
+
+		@DataPoints public static int[] l1 = IntStream.range(0, 5).toArray();
+
+		@Theory
+		public void sixArgsTheory(int i, boolean a, boolean b, boolean c, boolean d, int j) {
+		}
+	}
+
+	@Test
+	public void largeExhaustiveSearch() throws Exception  {
+
+		RunListener listener = runTestWithMockListener(LargeNumberOfArgs.class);
+
+		int expected = 5 * 5 * 2 * 2 * 2 * 2;
+
+        verify(listener, times(expected)).testStarted(Mockito.any());
+        verify(listener, times(expected)).testFinished(Mockito.any());
+        verify(listener, times(0)).testAssumptionFailure(Mockito.any());
+        verify(listener, times(0)).testFailure(Mockito.any());
+
+	}
 
 
 	private RunListener runTestWithMockListener(Class<?> testCase) {

@@ -11,32 +11,30 @@ import org.junit.runner.notification.RunListener;
  */
 public class AssumptionsFailureCounter extends RunListener {
 
-
 	private AtomicInteger assumptionsFailed = new AtomicInteger();
 	private final int assumptionLimit;
 
 	@Override
 	public void testAssumptionFailure(Failure failure) {
-		super.testAssumptionFailure(failure);
 		assumptionsFailed.incrementAndGet();
 	}
 
 	/**
 	 * Instantiates a new assumptions failure counter.
 	 *
-	 * @param assumptionLimit the assumption limit
+	 * @param assumptionLimit
+	 *            the assumption limit
 	 */
 	public AssumptionsFailureCounter(int assumptionLimit) {
 		this.assumptionLimit = assumptionLimit;
 	}
 
 	/**
-	 * Checks if numer of failed assumptions is within the limit.
+	 * Checks if number of failed assumptions is within the limit.
 	 *
 	 * @return true, if so
 	 */
-	public boolean isWithinLimit()
-	{
+	public boolean isWithinLimit() {
 		return assumptionsFailed.get() < assumptionLimit;
 	}
 

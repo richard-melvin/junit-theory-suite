@@ -90,9 +90,8 @@ public class ArgumentSet implements Iterable<Object[]> {
 
 		@Override
 		public Object[] next() {
-
+			assert nextValue != null;
 			return nextValue;
-
 		}
 
 		/**
