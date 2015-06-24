@@ -67,7 +67,6 @@ To use it, simply:
 
 ```
 
-This uses [jitpack.io](https://jitpack.io/) as a lightweight alternative to releasing to maven central.
 
 ## junit-theory-suite
 
@@ -84,6 +83,20 @@ junit-theory-suite uses a version of the JUnit theories runner that has been mod
 Tutorial documentation for JUnit theories is [here](doc/TheoriesTutorial.md).
 
 
+## Related tools
 
+[junit-quickcheck](https://github.com/pholser/junit-quickcheck) works with junit-theory-suite to generate random parameter values;
+see [QuickCheckIntegrationTest](src/test/java/com/github/radm/theories/test/QuickCheckIntegrationTest.java).
+
+[pitest](https://github.com/hcoles/pitest) provides mutation test coverage, which is very useful when doing theory-based testing to confirm you are actually properly testing the software and not just exercising it.
+
+[jcunit](https://github.com/dakusui/jcunit) does combinatorial testing using junit, which is useful to select an optimal subset of possible tests to be run. Unfortunately jcunit is an alternative, not a complement to junit-theory-suite, due to JUnit architectural restrictions:
+
+- you can only have one test runner
+- you can't do something as complex as theories without using a custom runner.
+
+[slf4j](http://www.slf4j.org/) is used for logging; this is the only dependency other than junit itself.
+
+[jitpack.io](https://jitpack.io/) is used as a lightweight alternative to releasing to maven central.
 
 
