@@ -51,14 +51,25 @@ public class ArgumentSetTest {
 						DayOfWeek.values(), DayOfWeek.values()));
 	}
 
-	public static @DataPoint ArgumentSet twoBooleansContrained = makeTwoBooleans().withConstraint("a",
-			args -> (Boolean) args[0]);
+	public static @DataPoint ArgumentSet fourWeekDays = makeFourDays()
+			.withConstraint("a", args -> isWeekDay((DayOfWeek) args[0]))
+			.withConstraint("b", args -> isWeekDay((DayOfWeek) args[1]))
+			.withConstraint("c", args -> isWeekDay((DayOfWeek) args[2]))
+			.withConstraint("d", args -> isWeekDay((DayOfWeek) args[3]));
+
+
+	public static @DataPoint ArgumentSet twoBooleansContrained = makeTwoBooleans()
+			.withConstraint("a", args -> (Boolean) args[0]);
 
 	public static @DataPoint ArgumentSet threeIntsContrained = makeThreeIntegers().withConstraint("c",
 			args -> isOdd((Integer) args[0]) && isOdd((Integer) args[1]) && isOdd((Integer) args[2]));
 
 	private static boolean isOdd(int i) {
 		return i % 2 == 1;
+	}
+
+	private static boolean isWeekDay(DayOfWeek dayOfWeek) {
+		return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
 	}
 
 	@Test
@@ -89,6 +100,11 @@ public class ArgumentSetTest {
 	@Test
 	public void expectedLength6() {
 		assertEquals(7 * 7 * 7 * 7, countArguments(fourDays));
+	}
+
+	@Test
+	public void expectedLength7() {
+		assertEquals(5 * 5 * 5 * 5, countArguments(fourWeekDays));
 	}
 
 
@@ -123,7 +139,7 @@ public class ArgumentSetTest {
 			count++;
 			Object[] next = iter.next();
 
-			LOG.info("got {}", Arrays.toString(next));
+			LOG.debug("got {}", Arrays.toString(next));
 		}
 		return count;
 	}

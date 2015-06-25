@@ -181,11 +181,14 @@ public class ArgumentSet implements Iterable<Object[]> {
 			boolean requiresReset = false;
 			while (!predicate.test(populateResult()) && !knownComplete)
 			{
-				LOG.info("Rejected {}", Arrays.toString(populateResult()));
+				if (LOG.isTraceEnabled())
+				{
+					LOG.trace("Rejected {} by predicate on {}", Arrays.toString(populateResult()),
+							argNames.get(argIndex));
+				}
 				if (valIter.hasNext())
 				{
 					currValue = valIter.next();
-					LOG.info("Trying {}", Arrays.toString(populateResult()));
 				}
 				else
 				{
