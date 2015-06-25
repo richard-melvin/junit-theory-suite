@@ -72,8 +72,27 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 	@Override
 	public Description getDescription() {
-		assert suiteDescription != null;
+		if( suiteDescription == null)
+		{
+			init();
+		}
 		return suiteDescription;
+	}
+
+
+
+	@Override
+	protected void collectInitializationErrors(List<Throwable> errors) {
+
+
+		computeTestMethods();
+		if (initFail != null)
+		{
+			errors.addAll(initFail);
+			initFail = null;
+		}
+
+
 	}
 
 	@Override

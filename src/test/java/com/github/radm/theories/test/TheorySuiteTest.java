@@ -129,7 +129,7 @@ public class TheorySuiteTest {
         assertEquals(0, result.getIgnoreCount());
 	}
 
-	public static class InvalidTest {
+	public abstract static class InvalidTheory {
 		@Theory
 		private int invalidTest() {
 			return -1;
@@ -138,13 +138,13 @@ public class TheorySuiteTest {
 	}
 
 	@Test
-	public void checksForInvalidTest()  {
-        Result result = JUnitCore.runClasses(runSelect, InvalidTest.class);
-        assertEquals(1, result.getRunCount());
-        assertEquals(1, result.getFailureCount());
+	public void checksForInvalidTheory()  {
+        Result result = JUnitCore.runClasses(runSelect, InvalidTheory.class);
+        assertEquals(2, result.getRunCount());
+        assertEquals(2, result.getFailureCount());
         assertEquals(0, result.getIgnoreCount());
 
-        result.getFailures().forEach(f -> assertTrue(f.toString(), f.toString().contains("ethod")));
+        result.getFailures().forEach(f -> assertTrue(f.toString(), f.toString().contains("Method invalidTest() should be")));
 	}
 
 
