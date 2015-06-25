@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.radm.theories.internals.ArgumentGenerator;
 import com.github.radm.theories.internals.AssumptionsFailureCounter;
+import com.github.radm.theories.internals.ConstraintFinder;
 import com.github.radm.theories.internals.MethodWithArguments;
 import com.github.radm.theories.internals.PotentialAssignmentFinder;
 import com.github.radm.theories.internals.TheoriesWrapper;
@@ -51,6 +52,9 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 	private Map<Method, AssumptionsFailureCounter> checksByMethod;
 
 	private PotentialAssignmentFinder finder;
+
+	private ConstraintFinder constraints;
+
 
 	/**
 	 * Instantiates a new theory suite.
@@ -168,6 +172,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		descriptions = new ConcurrentHashMap<>();
 		checksByMethod = new ConcurrentHashMap<>();
 		finder = new PotentialAssignmentFinder(getTestClass());
+		constraints = new ConstraintFinder(getTestClass());
 	}
 
 	/**
@@ -200,7 +205,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 		try {
 			Collection<MethodWithArguments> methodCases = new ArgumentGenerator(
-					finder, fm).computeTestMethodsWithArgs();
+					finder, constraints, fm).computeTestMethodsWithArgs();
 			Description methodDescription = Description.createSuiteDescription(fm
 					.getName());
 			descriptions.put(fm, methodDescription);

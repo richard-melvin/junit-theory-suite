@@ -100,6 +100,18 @@ public class ArgumentSet implements Iterable<Object[]> {
 		return new ArgumentSetIterator();
 	}
 
+
+
+	/**
+	 * Gets the arg names in declaration order.
+	 *
+	 * @return the arg names
+	 */
+	public List<String> getArgNames() {
+		return argNames;
+	}
+
+
 	/**
 	 * Iterate over the contents of an argset, while applying constraints.
 	 */

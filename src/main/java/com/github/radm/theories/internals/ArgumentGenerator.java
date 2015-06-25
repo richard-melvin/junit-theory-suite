@@ -25,6 +25,8 @@ public class ArgumentGenerator {
 
 	private final List<MethodWithArguments> testsCalls = new ArrayList<>();
 
+	private final ConstraintFinder constraints;
+
 	/**
 	 * Instantiates a new argument generator.
 	 *
@@ -34,10 +36,12 @@ public class ArgumentGenerator {
 	 *            the test method
 	 */
 	public ArgumentGenerator(PotentialAssignmentFinder finder,
+			ConstraintFinder constraints,
 			FrameworkMethod testMethod) {
 		super();
 		this.finder = finder;
 		this.testMethod = testMethod;
+		this.constraints = constraints;
 	}
 
 	/**
@@ -67,6 +71,7 @@ public class ArgumentGenerator {
 		}
 
 		ArgumentSet as = new ArgumentSet(colNames, allArgValues);
+		constraints.applyConstraintsTo(signatures, as);
 
 		for (Object[] rawArgs : as) {
 
