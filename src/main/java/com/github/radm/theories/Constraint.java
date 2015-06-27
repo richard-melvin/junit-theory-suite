@@ -13,11 +13,12 @@ import static java.lang.annotation.RetentionPolicy.*;
  * For each set of potential argument values to a theory function, those failing a constraint will be discarded
  * before the function is called.
  *
- * Theory arguments are matched to constraint arguments by the same rules used to match theory arguments to datapoints.
- * So arguments of a constraint function can be annotated with FromDatapoint to deal with the cases where the type alone is insufficient.
+ * Constraints with no value set are considered global, and apply to all theories that have a sequence of arguments of matching type.
+ * Other constraints are only used when referenced by the annotation {@link WithConstraints}.
  */
 @Retention(RUNTIME)
 @Target(METHOD)
 public @interface Constraint {
+    String value() default "";
 
 }

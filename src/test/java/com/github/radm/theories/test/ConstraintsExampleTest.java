@@ -1,5 +1,6 @@
 package com.github.radm.theories.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.time.DayOfWeek;
@@ -17,6 +18,7 @@ import org.junit.runner.RunWith;
 
 import com.github.radm.theories.Constraint;
 import com.github.radm.theories.TheorySuite;
+import com.github.radm.theories.WithConstraints;
 
 /**
  * Sample test to demonstrate the use of
@@ -32,23 +34,54 @@ public class ConstraintsExampleTest {
 	@DataPoints
 	public static int[] fullMonthDays = IntStream.range(1, 31).toArray();
 
-	@Constraint
-	public static boolean isWeekDay(DayOfWeek dayOfWeek) {
-		return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
-	}
-
+	/**
+	 * A global constraint, with no name set.
+	 */
 	@Constraint
 	public static boolean isEverValidDay(Month month, int monthDay) {
 		return monthDay <= month.maxLength();
 	}
 
+	/**
+	 * Another global constraint.
+	 */
+	@Constraint
 	public static boolean isValidDay(Year year, Month month, int monthDay) {
 		return isEverValidDay(month, monthDay) && monthDay <= year.atMonth(month).lengthOfMonth();
 	}
 
-	@Constraint
+	/**
+	 * A named constraint
+	 */
+	@Constraint("weekday")
+	public static boolean isWeekDay(DayOfWeek dayOfWeek) {
+		return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
+	}
+
+	/**
+	 * Another constraint with same name but different arguments
+	 */
+	@Constraint("weekday")
 	public static boolean isWeekDay(Year year, Month month, int monthDay) {
 		return isValidDay(year, month, monthDay) && isWeekDay(year.atMonth(month).atDay(monthDay).getDayOfWeek());
+	}
+
+
+	/**
+	 * Global constraint on arguments of a test.
+	 */
+	@Theory
+	public void yearDayRoundTrip(Year year, Month month, int monthDay) {
+
+		// no assume needed because of global constraint
+		int dayOfYear = year.atMonth(month).atDay(monthDay).getDayOfYear();
+
+		assertTrue(dayOfYear > 0);
+		assertTrue(dayOfYear <= 366);
+
+		assertEquals(month, year.atDay(dayOfYear).getMonth());
+		assertEquals(monthDay, year.atDay(dayOfYear).getDayOfMonth());
+
 	}
 
 	/**
@@ -57,6 +90,7 @@ public class ConstraintsExampleTest {
 	 * datapoint set.
 	 */
 	@Theory
+	@WithConstraints({"weekday"})
 	public void atLeastFourOfEachDayPerMonth(DayOfWeek dayOfWeek, Year year, Month month) {
 		assertTrue(isWeekDay(dayOfWeek));
 		YearMonth thisMonth = year.atMonth(month);
@@ -68,6 +102,7 @@ public class ConstraintsExampleTest {
 	}
 
 	@Theory
+	@WithConstraints({"weekday"})
 	public void mondayStartsWeek(Year year, Month month, int monthDay) {
 		assertTrue(isWeekDay(year, month, monthDay));
 
