@@ -17,11 +17,11 @@ import org.slf4j.LoggerFactory;
  * They should then prevent all matching sets values from being returned.
  *
  */
-public class ArgumentSet implements Iterable<Object[]> {
+public class ArgumentSet<T> implements Iterable<T[]> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ArgumentSet.class);
 	private final List<String> argNames;
-	private final List<? extends Iterable<Object>> argsValues;
+	private final List<? extends Iterable<? extends T>> argsValues;
 
 	private final Map<String, Predicate<Object[]>> constraints = new HashMap<>();
 
@@ -33,7 +33,7 @@ public class ArgumentSet implements Iterable<Object[]> {
 	 * @param argsValues
 	 *            the args values
 	 */
-	public ArgumentSet(List<String> argNames, List<? extends Iterable<Object>> argsValues) {
+	public ArgumentSet(List<String> argNames, List<? extends Iterable<? extends T>> argsValues) {
 		super();
 		this.argNames = argNames;
 		this.argsValues = argsValues;
@@ -49,16 +49,16 @@ public class ArgumentSet implements Iterable<Object[]> {
 	 * @param argsValues the arg values
 	 * @return the argument set
 	 */
-	public static ArgumentSet fromArray(List<String> argNames, List<Object[]> argsValues) {
+	public static <T> ArgumentSet<T> fromArray(List<String> argNames, List<T[]> argsValues) {
 
-		List <List<Object>> vals = new ArrayList<>(argsValues.size());
+		List <List<T>> vals = new ArrayList<>(argsValues.size());
 
-		for (Object[] o : argsValues)
+		for (T[] o : argsValues)
 		{
 			vals.add(Arrays.asList(o));
 		}
 
-		return new ArgumentSet(argNames, vals);
+		return new ArgumentSet<>(argNames, vals);
 	}
 
 
@@ -70,7 +70,7 @@ public class ArgumentSet implements Iterable<Object[]> {
 	 * @param constraint
 	 *            the constraint
 	 */
-	public ArgumentSet withConstraint(String argName, Predicate<Object[]> constraint) {
+	public ArgumentSet<T> withConstraint(String argName, Predicate<Object[]> constraint) {
 		Predicate<Object[]> existing = constraints.get(argName);
 		if (existing == null) {
 			constraints.put(argName, constraint);
@@ -96,7 +96,7 @@ public class ArgumentSet implements Iterable<Object[]> {
 	 * Iterate over all possible values of combinations or argument values
 	 */
 	@Override
-	public Iterator<Object[]> iterator() {
+	public Iterator<T[]> iterator() {
 		return new ArgumentSetIterator();
 	}
 
@@ -115,17 +115,17 @@ public class ArgumentSet implements Iterable<Object[]> {
 	/**
 	 * Iterate over the contents of an argset, while applying constraints.
 	 */
-	public class ArgumentSetIterator implements Iterator<Object[]> {
+	public class ArgumentSetIterator implements Iterator<T[]> {
 
 		private final int argIndex;
-		private Iterator<Object> valIter;
+		private Iterator<? extends T> valIter;
 		private final ArgumentSetIterator nextColumn;
 		private final ArgumentSetIterator prevColumn;
 		private final Predicate<Object[]> predicate;
 
-		Object currValue;
+		T currValue;
 		boolean knownComplete = false;
-		Object[] nextValue = null;
+		T[] nextValue = null;
 
 		ArgumentSetIterator() {
 			this(null);
@@ -147,7 +147,7 @@ public class ArgumentSet implements Iterable<Object[]> {
 
 		}
 
-		private Iterator<Object> makeIter() {
+		private Iterator<? extends T> makeIter() {
 			return argsValues.get(argIndex).iterator();
 		}
 
@@ -180,16 +180,16 @@ public class ArgumentSet implements Iterable<Object[]> {
 		}
 
 		@Override
-		public Object[] next() {
+		public T[] next() {
 			assert nextValue != null;
-			Object[] ret = nextValue;
+			T[] ret = nextValue;
 			nextValue = null;
 			return ret;
 		}
 
-		private Object[] computeNextPassingPredicate()
+		private T[] computeNextPassingPredicate()
 		{
-			Object[] candidate = computeNext();
+			T[] candidate = computeNext();
 			boolean requiresReset = false;
 			while (!predicate.test(populateResult()) && !knownComplete)
 			{
@@ -233,7 +233,7 @@ public class ArgumentSet implements Iterable<Object[]> {
 		 *
 		 * @return next object, or null.
 		 */
-		private Object[] computeNext() {
+		private T[] computeNext() {
 
 			if (nextColumn == null) {
 				if (valIter.hasNext()) {
@@ -265,7 +265,8 @@ public class ArgumentSet implements Iterable<Object[]> {
 
 		}
 
-		private Object[] populateResult() {
+		@SuppressWarnings("unchecked")
+		private T[] populateResult() {
 			Object[] ret = new Object[argIndex + 1];
 
 			ArgumentSetIterator it = this;
@@ -274,7 +275,7 @@ public class ArgumentSet implements Iterable<Object[]> {
 				it = it.prevColumn;
 			}
 
-			return ret;
+			return (T[]) ret;
 		}
 
 		private void reset() {

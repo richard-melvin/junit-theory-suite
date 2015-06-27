@@ -1,13 +1,10 @@
 package com.github.radm.theories.internals;
 
-import java.lang.reflect.Type;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.junit.contrib.theories.ParameterSignature;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.TestClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.github.radm.theories.Constraint;
 
@@ -17,62 +14,58 @@ import com.github.radm.theories.Constraint;
  */
 public class ConstraintFinder {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ConstraintFinder.class);
 
 	private final TestClass testClass;
-	private List<FrameworkMethod> constraintMethods;
+	private final List<MethodSignature> constraintMethods;
 
+	/**
+	 * Instantiates a new constraint finder.
+	 *
+	 * @param testClass the test class
+	 */
 	public ConstraintFinder(TestClass testClass) {
 		super();
 		this.testClass = testClass;
 
-		constraintMethods = testClass.getAnnotatedMethods(Constraint.class);
-	}
+		List<FrameworkMethod> annotatedMethods = testClass.getAnnotatedMethods(Constraint.class);
 
-	public void applyConstraintsTo(List<ParameterSignature> signature, ArgumentSet as) {
-
-		constraintMethods.stream().filter(cm -> matches(cm, signature)).forEach(cm -> applyTo(cm, as));
+		constraintMethods = annotatedMethods.stream().map(MethodSignature::new).collect(Collectors.toList());
 
 	}
 
-	private void applyTo(FrameworkMethod fcm, ArgumentSet as) {
+	/**
+	 * Apply matching constraints defined on current class to the set of test method arguments.
+	 *
+	 * @param fm the fm
+	 * @param as the as
+	 */
+	public void applyConstraintsTo(FrameworkMethod fm, ArgumentSet<Object> as) {
 
-		int applyCheckAt = fcm.getMethod().getParameterCount() - 1;
+		MethodSignature testSignature = new MethodSignature(fm);
 
-		as.withConstraint(as.getArgNames().get(applyCheckAt), args -> checkConstraintOn(fcm, args));
+		constraintMethods.stream().filter(cm -> cm.isSubListOf(testSignature))
+				.forEach(cm -> applyTo(cm, testSignature, as));
 
 	}
 
-	private boolean checkConstraintOn(FrameworkMethod fcm, Object[] args) {
+	private void applyTo(MethodSignature constraint, MethodSignature testSignature, ArgumentSet<Object> as) {
+
+		for (MethodSignature.Shim argMapping : constraint.buildShims(testSignature)) {
+
+			as.withConstraint(as.getArgNames().get(argMapping.lastMappedArgIndex()),
+					args -> checkConstraintOn(constraint.getFrameworkMethod(), argMapping, args));
+		}
+
+
+	}
+
+	private boolean checkConstraintOn(FrameworkMethod fcm, MethodSignature.Shim argMapping, Object[] args) {
 
 		try {
-			return (boolean) fcm.invokeExplosively(testClass, args);
+			return (boolean) fcm.invokeExplosively(testClass, argMapping.apply(args));
 		} catch (Throwable e) {
 			return false;
 		}
-	}
-
-	// TODO: drop restriction that arguments must be in same order
-	private boolean matches(FrameworkMethod fcm, List<ParameterSignature> signature) {
-
-		int parameterCount = fcm.getMethod().getParameterCount();
-		if (parameterCount > signature.size()) {
-			return false;
-		}
-
-		for (int i = 0; i < parameterCount; i++) {
-
-			Type parameterizedType = fcm.getMethod().getParameters()[i].getParameterizedType();
-			if (!signature.get(i).canAcceptType(parameterizedType)) {
-
-				LOG.info("discarding potential constraint {} as arg {} type {} wrong", fcm, i, parameterizedType);
-
-				return false;
-			}
-		}
-		LOG.info("using constraint {} with {} arguments", fcm, parameterCount);
-
-		return true;
 	}
 
 }

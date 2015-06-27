@@ -45,7 +45,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 	private List<FrameworkMethod> allMethodsWithAllArgs;
 
-	private List<Throwable> initFail;
+	private List<Throwable> initFail = null;
 
 	private Description suiteDescription;
 
