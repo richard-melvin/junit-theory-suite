@@ -83,7 +83,10 @@ public class ConstraintFinder {
 		for (MethodSignature.Shim argMapping : constraint.buildShims(testSignature)) {
 
 			String argName = as.getArgNames().get(argMapping.lastMappedArgIndex());
-			LOG.info("Add constraint {} @ {}", constraint.getFrameworkMethod(), argName);
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Add constraint {} @ {}", constraint.getFrameworkMethod(), argName);
+			}
 			as.withConstraint(argName,
 					args -> checkConstraintOn(constraint.getFrameworkMethod(), argMapping, args));
 		}

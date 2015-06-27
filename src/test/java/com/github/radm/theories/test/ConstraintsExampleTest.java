@@ -3,6 +3,7 @@ package com.github.radm.theories.test;
 import static org.junit.Assert.assertTrue;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.Month;
 import java.time.Year;
 import java.time.YearMonth;
@@ -50,6 +51,11 @@ public class ConstraintsExampleTest {
 		return isValidDay(year, month, monthDay) && isWeekDay(year.atMonth(month).atDay(monthDay).getDayOfWeek());
 	}
 
+	/**
+	 * Simple constraint on one argument of a test.
+	 * Could be done in other ways, but occasionally useful to restrict the domain of an enumeration or
+	 * datapoint set.
+	 */
 	@Theory
 	public void atLeastFourOfEachDayPerMonth(DayOfWeek dayOfWeek, Year year, Month month) {
 		assertTrue(isWeekDay(dayOfWeek));
@@ -60,5 +66,23 @@ public class ConstraintsExampleTest {
 
 		assertTrue(count >= 0);
 	}
+
+	@Theory
+	public void mondayStartsWeek(Year year, Month month, int monthDay) {
+		assertTrue(isWeekDay(year, month, monthDay));
+
+		LocalDate day = year.atMonth(month).atDay(monthDay);
+
+		if (day.getDayOfWeek() == DayOfWeek.MONDAY)
+		{
+			assertTrue(!isWeekDay(day.minusDays(1).getDayOfWeek()));
+		}
+		else
+		{
+			assertTrue(isWeekDay(day.minusDays(1).getDayOfWeek()));
+		}
+
+	}
+
 
 }
