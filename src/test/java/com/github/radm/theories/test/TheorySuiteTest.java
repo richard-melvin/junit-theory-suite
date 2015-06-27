@@ -20,33 +20,20 @@ import org.junit.Test;
 import org.junit.contrib.theories.DataPoints;
 import org.junit.contrib.theories.FromDataPoints;
 import org.junit.contrib.theories.Theory;
-import org.junit.runner.Computer;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
-import org.junit.runner.Runner;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
-import org.junit.runners.model.RunnerBuilder;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
-import com.github.radm.theories.TheorySuite;
 
 /**
  * unit test for TheorySuite.
  * Covers more details than the ExampleTest
  *
  */
-public class TheorySuiteTest {
-
-	public static final Computer runSelect = new Computer() {
-		@Override
-		protected Runner getRunner(RunnerBuilder builder, Class<?> testClass)
-				throws Throwable {
-			return new TheorySuite(testClass);
-		}
-	};
+public class TheorySuiteTest extends CustomRunnerTest {
 
 	public static class ValidTest {
 		@Test
@@ -337,15 +324,6 @@ public class TheorySuiteTest {
         verify(listener, times(0)).testAssumptionFailure(Mockito.any());
         verify(listener, times(0)).testFailure(Mockito.any());
 
-	}
-
-
-	private RunListener runTestWithMockListener(Class<?> testCase) {
-		RunListener listener = Mockito.mock(RunListener.class);
-		JUnitCore core = new JUnitCore();
-		core.addListener(listener);
-		core.run(runSelect, testCase);
-		return listener;
 	}
 
 

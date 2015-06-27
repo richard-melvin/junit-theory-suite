@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.TestClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.radm.theories.Constraint;
 
@@ -14,8 +16,9 @@ import com.github.radm.theories.Constraint;
  */
 public class ConstraintFinder {
 
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ConstraintFinder.class);
 
-	private final TestClass testClass;
 	private final List<MethodSignature> constraintMethods;
 
 	/**
@@ -25,8 +28,6 @@ public class ConstraintFinder {
 	 */
 	public ConstraintFinder(TestClass testClass) {
 		super();
-		this.testClass = testClass;
-
 		List<FrameworkMethod> annotatedMethods = testClass.getAnnotatedMethods(Constraint.class);
 
 		constraintMethods = annotatedMethods.stream().map(MethodSignature::new).collect(Collectors.toList());
@@ -52,18 +53,20 @@ public class ConstraintFinder {
 
 		for (MethodSignature.Shim argMapping : constraint.buildShims(testSignature)) {
 
-			as.withConstraint(as.getArgNames().get(argMapping.lastMappedArgIndex()),
+			String argName = as.getArgNames().get(argMapping.lastMappedArgIndex());
+			LOG.info("Add constraint {} @ {}", constraint.getFrameworkMethod(), argName);
+			as.withConstraint(argName,
 					args -> checkConstraintOn(constraint.getFrameworkMethod(), argMapping, args));
 		}
-
 
 	}
 
 	private boolean checkConstraintOn(FrameworkMethod fcm, MethodSignature.Shim argMapping, Object[] args) {
 
 		try {
-			return (boolean) fcm.invokeExplosively(testClass, argMapping.apply(args));
+			return (boolean) fcm.invokeExplosively(null, argMapping.apply(args));
 		} catch (Throwable e) {
+			LOG.debug("Exception while checking constraint:", e);
 			return false;
 		}
 	}
