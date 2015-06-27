@@ -1,5 +1,6 @@
 package com.github.radm.theories.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.stream.DoubleStream;
@@ -8,6 +9,8 @@ import java.util.stream.IntStream;
 import org.junit.Test;
 import org.junit.contrib.theories.DataPoints;
 import org.junit.contrib.theories.Theory;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
 import org.junit.runner.notification.RunListener;
 
 import com.github.radm.theories.Constraint;
@@ -91,8 +94,6 @@ public class ConstraintTest extends CustomRunnerTest {
 
 	}
 
-
-
 	public static class OnePair extends SimpleConstraints {
 
 		@Theory
@@ -110,7 +111,6 @@ public class ConstraintTest extends CustomRunnerTest {
 		alwaysPassesWithCases(listener, 6);
 
 	}
-
 
 	public static class TwoPairs extends SimpleConstraints {
 
@@ -132,7 +132,6 @@ public class ConstraintTest extends CustomRunnerTest {
 
 	}
 
-
 	public static class TwoPairsWithExtraArguments extends SimpleConstraints {
 
 		@Theory
@@ -151,6 +150,32 @@ public class ConstraintTest extends CustomRunnerTest {
 		RunListener listener = runTestWithMockListener(TwoPairsWithExtraArguments.class);
 
 		alwaysPassesWithCases(listener, 10 * 5);
+
+	}
+
+	public static class InvalidConstraint {
+
+		@Constraint
+		private int badConstraint() {
+			return 0;
+		}
+
+		@Theory
+		public void oneArg(boolean b) {
+			assertTrue(b);
+		}
+	}
+
+	@Test
+	public void invalidConstraint() throws Exception {
+
+        Result result = JUnitCore.runClasses(runSelect, InvalidConstraint.class);
+
+        result.getFailures().forEach(f -> assertTrue(f.toString(), f.toString().contains("Constraint method badConstraint")));
+
+        assertEquals(4, result.getRunCount());
+        assertEquals(4, result.getFailureCount());
+        assertEquals(0, result.getIgnoreCount());
 
 	}
 

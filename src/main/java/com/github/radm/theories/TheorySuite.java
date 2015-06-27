@@ -172,7 +172,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		descriptions = new ConcurrentHashMap<>();
 		checksByMethod = new ConcurrentHashMap<>();
 		finder = new PotentialAssignmentFinder(getTestClass());
-		constraints = new ConstraintFinder(getTestClass());
+		constraints = new ConstraintFinder(getTestClass(), this::reportError);
 	}
 
 	/**
