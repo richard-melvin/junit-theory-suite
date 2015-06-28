@@ -32,8 +32,7 @@ import com.github.radm.theories.internals.TheoriesWrapper;
  */
 public class TheorySuite extends BlockJUnit4ClassRunner {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(TheorySuite.class);
+	private static final Logger LOG = LoggerFactory.getLogger(TheorySuite.class);
 
 	private Map<FrameworkMethod, Description> descriptions;
 
@@ -76,26 +75,19 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 	@Override
 	public Description getDescription() {
-		if( suiteDescription == null)
-		{
-			init();
-		}
+		ensureInit();
+
 		return suiteDescription;
 	}
-
-
 
 	@Override
 	protected void collectInitializationErrors(List<Throwable> errors) {
 
-
 		computeTestMethods();
-		if (initFail != null)
-		{
+		if (initFail != null) {
 			errors.addAll(initFail);
 			initFail = null;
 		}
-
 
 	}
 
@@ -108,41 +100,46 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 			return super.computeTestMethods();
 		}
 
-		if (allMethodsWithAllArgs == null) {
-			init();
-			for (FrameworkMethod fm : runner.computeTestMethods()) {
-				if (fm.getAnnotation(Theory.class) == null) {
-					recordNonTheoryCase(fm);
-				} else {
-					recordTheoryCase(runner, fm);
-				}
+		ensureInit();
+		if (allMethodsWithAllArgs == null)
+		{
+			computeTestMethodsWithArgs(runner);
 
-				if (initFail != null)
-				{
-					break;
-				}
-			}
 		}
 
 		return allMethodsWithAllArgs;
+	}
+
+
+	private void computeTestMethodsWithArgs(TheoriesWrapper runner) {
+		allMethodsWithAllArgs = new ArrayList<>();
+
+		for (FrameworkMethod fm : runner.computeTestMethods()) {
+			if (fm.getAnnotation(Theory.class) == null) {
+				recordNonTheoryCase(fm);
+			} else {
+				recordTheoryCase(runner, fm);
+			}
+
+			if (initFail != null) {
+				break;
+			}
+		}
 	}
 
 	@Override
 	protected void runChild(final FrameworkMethod fm, RunNotifier notifier) {
 
 		if (checksByMethod.containsKey(fm.getMethod())) {
-			AssumptionsFailureCounter listener = checksByMethod.get(fm
-					.getMethod());
+			AssumptionsFailureCounter listener = checksByMethod.get(fm.getMethod());
 
 			notifier.addListener(listener);
 			try {
 				super.runChild(fm, notifier);
 				if (!listener.isWithinLimit()) {
 					MethodWithArguments mwa = (MethodWithArguments) fm;
-					notifier.fireTestFailure(new Failure(
-							describeChild(mwa.getParent()),
-							new AssertionError(
-									"Never found parameters that satisfied method assumptions.")));
+					notifier.fireTestFailure(new Failure(describeChild(mwa.getParent()),
+							new AssertionError("Never found parameters that satisfied method assumptions.")));
 				}
 			} finally {
 				notifier.removeListener(listener);
@@ -161,18 +158,20 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 	}
 
+
 	/**
 	 * Initialise all data members. Needed as a lot of work gets done before
 	 * constructor completes.
 	 */
-	private void init() {
-		suiteDescription = Description.createSuiteDescription(getTestClass()
-				.getJavaClass());
-		allMethodsWithAllArgs = new ArrayList<>();
-		descriptions = new ConcurrentHashMap<>();
-		checksByMethod = new ConcurrentHashMap<>();
-		finder = new PotentialAssignmentFinder(getTestClass());
-		constraints = new ConstraintFinder(getTestClass(), this::reportError);
+	private void ensureInit() {
+		if (suiteDescription == null) {
+
+			suiteDescription = Description.createSuiteDescription(getTestClass().getJavaClass());
+			descriptions = new ConcurrentHashMap<>();
+			checksByMethod = new ConcurrentHashMap<>();
+			finder = new PotentialAssignmentFinder(getTestClass());
+			constraints = new ConstraintFinder(getTestClass(), this::reportError);
+		}
 	}
 
 	/**
@@ -185,8 +184,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		LOG.debug("non-theory test {}", fm);
 
 		allMethodsWithAllArgs.add(fm);
-		Description desc = Description.createTestDescription(
-				suiteDescription.getTestClass(), fm.getName());
+		Description desc = Description.createTestDescription(suiteDescription.getTestClass(), fm.getName());
 		suiteDescription.addChild(desc);
 
 		descriptions.put(fm, desc);
@@ -204,21 +202,18 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 	private void recordTheoryCase(TheoriesWrapper runner, FrameworkMethod fm) {
 
 		try {
-			Collection<MethodWithArguments> methodCases = new ArgumentGenerator(
-					finder, constraints, fm).computeTestMethodsWithArgs();
-			Description methodDescription = Description.createSuiteDescription(fm
-					.getName());
+			Collection<MethodWithArguments> methodCases = new ArgumentGenerator(finder, constraints, fm)
+					.computeTestMethodsWithArgs();
+			Description methodDescription = Description.createSuiteDescription(fm.getName());
 			descriptions.put(fm, methodDescription);
 
 			suiteDescription.addChild(methodDescription);
 			if (methodCases.isEmpty()) {
-				reportError(new Error("No test cases found for " + fm
-						+ "; missing annotations?"));
+				reportError(new Error("No test cases found for " + fm + "; missing annotations?"));
 			} else {
 				recordCases(methodDescription, methodCases);
 
-				checksByMethod.put(fm.getMethod(), new AssumptionsFailureCounter(
-						methodCases.size()));
+				checksByMethod.put(fm.getMethod(), new AssumptionsFailureCounter(methodCases.size()));
 				LOG.debug("theory {} has {} cases", fm, methodCases.size());
 
 			}
@@ -229,13 +224,12 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		}
 	}
 
-	private void recordCases(Description methodDescription,
-			Collection<MethodWithArguments> methodCases) {
+	private void recordCases(Description methodDescription, Collection<MethodWithArguments> methodCases) {
 		allMethodsWithAllArgs.addAll(methodCases);
 
 		for (MethodWithArguments testCase : methodCases) {
-			Description testDescription = Description.createTestDescription(
-					suiteDescription.getTestClass(), testCase.getName());
+			Description testDescription = Description.createTestDescription(getTestClass().getJavaClass(),
+					testCase.getName());
 
 			methodDescription.addChild(testDescription);
 			descriptions.put(testCase, testDescription);
@@ -252,8 +246,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 	private TheoriesWrapper getEmbeddedRunner() {
 		if (embeddedRunner == null) {
 			try {
-				embeddedRunner = new TheoriesWrapper(getTestClass()
-						.getJavaClass());
+				embeddedRunner = new TheoriesWrapper(getTestClass().getJavaClass());
 			} catch (InitializationError e) {
 				initFail = e.getCauses();
 			}
