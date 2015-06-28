@@ -58,7 +58,7 @@ public class TheorySuiteTest extends CustomRunnerTest {
         Failure failure = result.getFailures().get(0);
 		assertTrue(failure.getException() instanceof AssertionError);
 
-		assertTrue(failure.getDescription().getDisplayName().startsWith("simpleFailingTheory(false)"));
+		assertTrue(failure.getDescription().getDisplayName().startsWith("simpleFailingTheory[false]"));
 
 	}
 
@@ -85,6 +85,51 @@ public class TheorySuiteTest extends CustomRunnerTest {
         }
 
 	}
+
+	@Test
+	public void simpleValidTestFilteredTestMethod() throws Exception  {
+
+		RunListener listener = runTestCaseWithMockListener(ValidTest.class,
+				Description.createTestDescription(ValidTest.class, "simplePassingTest"));
+
+		ArgumentCaptor<Description> argument = ArgumentCaptor.forClass(Description.class);
+
+        verify(listener, times(1)).testRunStarted(Mockito.any());
+        verify(listener, times(1)).testStarted(argument.capture());
+        verify(listener, times(1)).testFinished(Mockito.any());
+        verify(listener, times(0)).testAssumptionFailure(Mockito.any());
+        verify(listener, times(0)).testFailure(Mockito.any());
+
+
+        assertEquals("simplePassingTest", argument.getValue().getMethodName());
+        assertEquals(ValidTest.class, argument.getValue().getTestClass());
+        assertEquals(0, argument.getValue().getChildren().size());
+
+	}
+
+	@Test
+	public void simpleValidTestFilteredTheory() throws Exception  {
+
+		RunListener listener = runTestCaseWithMockListener(ValidTest.class,
+				Description.createTestDescription(ValidTest.class, "simpleFailingTheory[true]"));
+
+		ArgumentCaptor<Description> argument = ArgumentCaptor.forClass(Description.class);
+
+        verify(listener, times(1)).testRunStarted(Mockito.any());
+        verify(listener, times(1)).testStarted(argument.capture());
+        verify(listener, times(1)).testFinished(Mockito.any());
+        verify(listener, times(0)).testAssumptionFailure(Mockito.any());
+        verify(listener, times(0)).testFailure(Mockito.any());
+
+
+        assertEquals("simpleFailingTheory[true]", argument.getValue().getMethodName());
+        assertEquals(ValidTest.class, argument.getValue().getTestClass());
+        assertEquals(0, argument.getValue().getChildren().size());
+
+	}
+
+
+
 
 	public static class BeforeAndAfter {
 

@@ -9,6 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.contrib.theories.Theory;
 import org.junit.runner.Description;
+import org.junit.runner.manipulation.Filter;
+import org.junit.runner.manipulation.NoTestsRemainException;
+import org.junit.runner.manipulation.Sorter;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
@@ -50,10 +53,15 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 	private Map<Method, AssumptionsFailureCounter> checksByMethod;
 
+	private Map<Method, MethodWithArguments> argsByMethod;
+
 	private PotentialAssignmentFinder finder;
 
 	private ConstraintFinder constraints;
 
+	private Filter filter;
+
+	private Sorter sorter;
 
 	/**
 	 * Instantiates a new theory suite.
@@ -73,11 +81,50 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 	}
 
+	/**
+	 * The defines the tree of tests that will be run.
+	 */
 	@Override
 	public Description getDescription() {
+
 		ensureInit();
+		if (filter != Filter.ALL || sorter != null) {
+			suiteDescription = rebuildDescriptionByFilter(suiteDescription);
+		}
 
 		return suiteDescription;
+	}
+
+	private Description rebuildDescriptionByFilter(Description description) {
+
+		Description ret = description.childlessCopy();
+
+		ArrayList<Description> children = description.getChildren();
+		if (sorter != null) {
+			children.sort(sorter);
+		}
+		for (Description child : children) {
+			if (filterAppliesToAny(child, filter)) {
+				ret.addChild(rebuildDescriptionByFilter(child));
+			}
+		}
+		return ret;
+
+	}
+
+	private static boolean filterAppliesToAny(Description d, Filter f) {
+		if (f.shouldRun(d)) {
+			return true;
+		}
+
+		for (Description c : d.getChildren()) {
+			if (filterAppliesToAny(c, f)) {
+				return true;
+			}
+		}
+
+		return false;
+
 	}
 
 	@Override
@@ -101,8 +148,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		}
 
 		ensureInit();
-		if (allMethodsWithAllArgs == null)
-		{
+		if (allMethodsWithAllArgs == null) {
 			computeTestMethodsWithArgs(runner);
 
 		}
@@ -110,11 +156,25 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		return allMethodsWithAllArgs;
 	}
 
+	@Override
+	public void filter(Filter filter) throws NoTestsRemainException {
+		super.filter(filter);
+
+		this.filter = filter;
+	}
+
+	@Override
+	public void sort(Sorter sorter) {
+		super.sort(sorter);
+
+		this.sorter = sorter;
+	}
 
 	private void computeTestMethodsWithArgs(TheoriesWrapper runner) {
 		allMethodsWithAllArgs = new ArrayList<>();
 
 		for (FrameworkMethod fm : runner.computeTestMethods()) {
+
 			if (fm.getAnnotation(Theory.class) == null) {
 				recordNonTheoryCase(fm);
 			} else {
@@ -158,7 +218,6 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 	}
 
-
 	/**
 	 * Initialise all data members. Needed as a lot of work gets done before
 	 * constructor completes.
@@ -169,8 +228,10 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 			suiteDescription = Description.createSuiteDescription(getTestClass().getJavaClass());
 			descriptions = new ConcurrentHashMap<>();
 			checksByMethod = new ConcurrentHashMap<>();
+			argsByMethod = new ConcurrentHashMap<>();
 			finder = new PotentialAssignmentFinder(getTestClass());
 			constraints = new ConstraintFinder(getTestClass(), this::reportError);
+			filter = Filter.ALL;
 		}
 	}
 
@@ -181,13 +242,18 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 	 *            the framework method
 	 */
 	private void recordNonTheoryCase(FrameworkMethod fm) {
-		LOG.debug("non-theory test {}", fm);
 
-		allMethodsWithAllArgs.add(fm);
 		Description desc = Description.createTestDescription(suiteDescription.getTestClass(), fm.getName());
-		suiteDescription.addChild(desc);
+		LOG.debug("non-theory test {} ", fm);
 
-		descriptions.put(fm, desc);
+		if (filter.shouldRun(desc)) {
+			LOG.trace("passes filter as {} ", desc);
+
+			allMethodsWithAllArgs.add(fm);
+			suiteDescription.addChild(desc);
+
+			descriptions.put(fm, desc);
+		}
 
 	}
 
@@ -205,18 +271,23 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 			Collection<MethodWithArguments> methodCases = new ArgumentGenerator(finder, constraints, fm)
 					.computeTestMethodsWithArgs();
 			Description methodDescription = Description.createSuiteDescription(fm.getName());
-			descriptions.put(fm, methodDescription);
 
-			suiteDescription.addChild(methodDescription);
-			if (methodCases.isEmpty()) {
-				reportError(new Error("No test cases found for " + fm + "; missing annotations?"));
-			} else {
-				recordCases(methodDescription, methodCases);
+			if (filter.shouldRun(methodDescription)) {
 
-				checksByMethod.put(fm.getMethod(), new AssumptionsFailureCounter(methodCases.size()));
-				LOG.debug("theory {} has {} cases", fm, methodCases.size());
+				descriptions.put(fm, methodDescription);
 
+				suiteDescription.addChild(methodDescription);
+				if (methodCases.isEmpty()) {
+					reportError(new Error("No test cases found for " + fm + "; missing annotations?"));
+				} else {
+					recordCases(fm, methodDescription, methodCases);
+
+					checksByMethod.put(fm.getMethod(), new AssumptionsFailureCounter(methodCases.size()));
+					LOG.debug("theory {} has {} cases", fm, methodCases.size());
+
+				}
 			}
+
 		} catch (Throwable e) {
 			LOG.debug("collecting arguments", e);
 
@@ -224,7 +295,8 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		}
 	}
 
-	private void recordCases(Description methodDescription, Collection<MethodWithArguments> methodCases) {
+	private void recordCases(FrameworkMethod fm, Description methodDescription,
+			Collection<MethodWithArguments> methodCases) {
 		allMethodsWithAllArgs.addAll(methodCases);
 
 		for (MethodWithArguments testCase : methodCases) {
@@ -233,6 +305,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 			methodDescription.addChild(testDescription);
 			descriptions.put(testCase, testDescription);
+			argsByMethod.put(fm.getMethod(), testCase);
 		}
 
 	}

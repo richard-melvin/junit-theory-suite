@@ -36,7 +36,7 @@ public class MethodWithArguments extends FrameworkMethod {
 	@Override
 	public String getName() {
 
-		StringJoiner sj = new StringJoiner(",", super.getName() + "(", ")");
+		StringJoiner sj = new StringJoiner(",", super.getName() + "[", "]");
 
 		for (int i = 0; i < args.length; i++) {
 			sj.add(args[i].toString());
