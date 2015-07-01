@@ -3,6 +3,7 @@ package com.github.radm.theories;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,7 +38,6 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TheorySuite.class);
 
-	private Map<FrameworkMethod, Description> descriptions;
 
 	/**
 	 * currently reuses some of the implementation of the default theories
@@ -45,15 +45,15 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 	 */
 	private TheoriesWrapper embeddedRunner;
 
+	private List<Throwable> initFail = null;
+
 	private List<FrameworkMethod> allMethodsWithAllArgs;
 
-	private List<Throwable> initFail = null;
+	private Map<FrameworkMethod, Description> descriptions;
 
 	private Description suiteDescription;
 
 	private Map<Method, AssumptionsFailureCounter> checksByMethod;
-
-	private Map<Method, MethodWithArguments> argsByMethod;
 
 	private PotentialAssignmentFinder finder;
 
@@ -226,9 +226,8 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		if (suiteDescription == null) {
 
 			suiteDescription = Description.createSuiteDescription(getTestClass().getJavaClass());
-			descriptions = new ConcurrentHashMap<>();
+			descriptions = new IdentityHashMap<>();
 			checksByMethod = new ConcurrentHashMap<>();
-			argsByMethod = new ConcurrentHashMap<>();
 			finder = new PotentialAssignmentFinder(getTestClass());
 			constraints = new ConstraintFinder(getTestClass(), this::reportError);
 			filter = Filter.ALL;
@@ -305,7 +304,6 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 			methodDescription.addChild(testDescription);
 			descriptions.put(testCase, testDescription);
-			argsByMethod.put(fm.getMethod(), testCase);
 		}
 
 	}

@@ -362,16 +362,30 @@ public class TheorySuiteTest extends CustomRunnerTest {
 
 		RunListener listener = runTestWithMockListener(LargeNumberOfArgs.class);
 
-		int expected = 5 * 5 * 2 * 2 * 2 * 2;
-
-        verify(listener, times(expected)).testStarted(Mockito.any());
-        verify(listener, times(expected)).testFinished(Mockito.any());
-        verify(listener, times(0)).testAssumptionFailure(Mockito.any());
-        verify(listener, times(0)).testFailure(Mockito.any());
+		alwaysPassesWithCases(listener, 5 * 5 * 2 * 2 * 2 * 2);
 
 	}
 
 
+
+
+	public static class StringArgs {
+
+		@DataPoints public static String[] l1 = {"hello", "(/)"};
+
+		@Theory
+		public void stringArgsTheory(String s1, String s2, String s3) {
+		}
+	}
+
+	@Test
+	public void stringArgs() throws Exception  {
+
+		RunListener listener = runTestWithMockListener(StringArgs.class);
+
+		alwaysPassesWithCases(listener, 2 * 2 * 2);
+
+	}
 
 
 }

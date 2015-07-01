@@ -50,10 +50,10 @@ public abstract class CustomRunnerTest {
 	}
 
 	protected void alwaysPassesWithCases(RunListener listener, int expected) throws Exception {
+		verify(listener, times(0)).testAssumptionFailure(Mockito.any());
+		verify(listener, times(0)).testFailure(Mockito.any());
 		verify(listener, times(expected)).testStarted(Mockito.any());
 	    verify(listener, times(expected)).testFinished(Mockito.any());
-	    verify(listener, times(0)).testAssumptionFailure(Mockito.any());
-	    verify(listener, times(0)).testFailure(Mockito.any());
 	}
 
 }
