@@ -1,4 +1,4 @@
-package com.github.radm.theories.pairwise;
+package com.github.radm.theories.pairwise.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

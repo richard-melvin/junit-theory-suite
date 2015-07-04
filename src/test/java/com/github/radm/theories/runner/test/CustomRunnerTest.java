@@ -1,4 +1,4 @@
-package com.github.radm.theories.test;
+package com.github.radm.theories.runner.test;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;

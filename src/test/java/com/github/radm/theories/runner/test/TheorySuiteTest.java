@@ -1,4 +1,4 @@
-package com.github.radm.theories.test;
+package com.github.radm.theories.runner.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

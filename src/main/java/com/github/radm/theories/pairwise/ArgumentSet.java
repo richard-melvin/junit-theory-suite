@@ -21,7 +21,7 @@ public class ArgumentSet<T> implements Iterable<T[]> {
 
 	static final Logger LOG = LoggerFactory.getLogger(ArgumentSet.class);
 	final List<String> argNames;
-	final List<? extends Iterable<? extends T>> argsValues;
+	final List<List<T>> argsValues;
 
 	private final Map<String, Predicate<Object[]>> constraints = new HashMap<>();
 
@@ -33,7 +33,7 @@ public class ArgumentSet<T> implements Iterable<T[]> {
 	 * @param argsValues
 	 *            the args values
 	 */
-	public ArgumentSet(List<String> argNames, List<? extends Iterable<? extends T>> argsValues) {
+	public ArgumentSet(List<String> argNames, List<List<T>> argsValues) {
 		super();
 		this.argNames = argNames;
 		this.argsValues = argsValues;

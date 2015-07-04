@@ -61,7 +61,7 @@ public class ArgumentGenerator {
 		List<String> colNames = new ArrayList<>(signatures.stream()
 				.map(ParameterSignature::getName).collect(Collectors.toList()));
 
-		List<Iterable<Object>> allArgValues = new ArrayList<>(signatures.size());
+		List<List<Object>> allArgValues = new ArrayList<>(signatures.size());
 		for (ParameterSignature sig : signatures) {
 			List<PotentialAssignment> potentialsFor = finder.potentialsFor(sig);
 			List<Object> argVal = new ArrayList<>(potentialsFor.size());
