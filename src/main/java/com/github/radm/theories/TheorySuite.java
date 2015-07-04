@@ -21,12 +21,12 @@ import org.junit.runners.model.InitializationError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.radm.theories.internals.ArgumentGenerator;
-import com.github.radm.theories.internals.AssumptionsFailureCounter;
-import com.github.radm.theories.internals.ConstraintFinder;
-import com.github.radm.theories.internals.MethodWithArguments;
-import com.github.radm.theories.internals.PotentialAssignmentFinder;
-import com.github.radm.theories.internals.TheoriesWrapper;
+import com.github.radm.theories.runner.ArgumentGenerator;
+import com.github.radm.theories.runner.AssumptionsFailureCounter;
+import com.github.radm.theories.runner.ConstraintFinder;
+import com.github.radm.theories.runner.MethodWithArguments;
+import com.github.radm.theories.runner.PotentialAssignmentFinder;
+import com.github.radm.theories.runner.TheoriesWrapper;
 
 /**
  * A TheorySuite is a JUnit test runner that understands all the test

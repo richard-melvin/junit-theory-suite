@@ -1,4 +1,4 @@
-package com.github.radm.theories.internals;
+package com.github.radm.theories.runner;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.radm.theories.Constraint;
 import com.github.radm.theories.WithConstraints;
+import com.github.radm.theories.pairwise.ArgumentSet;
 
 /**
  * Find the set of constraint functions.

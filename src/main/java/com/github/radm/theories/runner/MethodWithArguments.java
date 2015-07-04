@@ -1,4 +1,4 @@
-package com.github.radm.theories.internals;
+package com.github.radm.theories.runner;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;

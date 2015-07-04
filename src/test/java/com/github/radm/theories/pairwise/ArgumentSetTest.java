@@ -1,4 +1,4 @@
-package com.github.radm.theories.internals.test;
+package com.github.radm.theories.pairwise;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.radm.theories.internals.ArgumentSet;
+import com.github.radm.theories.pairwise.ArgumentSet;
 
 /**
  * unit test of ArgumentSet. Note uses old theories runner to be safe.

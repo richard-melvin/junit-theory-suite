@@ -1,4 +1,4 @@
-package com.github.radm.theories.internals;
+package com.github.radm.theories.runner;
 
 import static java.util.Collections.emptyList;
 import static org.javaruntype.type.Types.forJavaLangReflectType;
