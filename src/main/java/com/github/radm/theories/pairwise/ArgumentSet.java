@@ -100,6 +100,18 @@ public class ArgumentSet<T> implements Iterable<T[]> {
 		return new ExhaustiveIterator<T>(this);
 	}
 
+	/**
+	 * Iterate over all pairwise combinations of argument values
+	 */
+	public Iterator<T[]> pairwiseIterator() {
+
+		// no point doing pairwise logic for small cases
+		if (argNames.size() <= 2) {
+			return iterator();
+		}
+
+		return new PairwiseIterator<T>(this);
+	}
 
 
 	/**

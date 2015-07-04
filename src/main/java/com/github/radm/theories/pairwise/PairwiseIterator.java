@@ -36,6 +36,10 @@ public class PairwiseIterator<T> extends ArgSetIterator<T>{
 			selection[i] = columnStates.get(i).selectGiven(selection);
 		}
 
+		for (int i = 0; i < selection.length; i++) {
+			columnStates.get(i).flagAsSelected(selection);
+		}
+
 		return fillIn(selection);
 	}
 
@@ -52,14 +56,8 @@ public class PairwiseIterator<T> extends ArgSetIterator<T>{
 
 	private boolean isCoverageComplete() {
 
-		for (PairWiseState<T> pws : columnStates)
-		{
-			if (!pws.isComplete())
-			{
-				return false;
-			}
-		}
-		return true;
+		return columnStates.stream().allMatch(PairWiseState::isComplete);
+
 	}
 
 }
