@@ -12,13 +12,15 @@ import java.util.List;
  */
 public class PairwiseIterator<T> extends ArgSetIterator<T>{
 
-	List<PairWiseState<T>> columnStates = new ArrayList<>();
+	List<PairWiseState> columnStates = new ArrayList<>();
 
 	protected PairwiseIterator(ArgumentSet<T> args) {
 		super(args);
 
+		int[] argCounts = args.argsValues.stream().mapToInt(List::size).toArray();
+
 		for (int i = 0; i < args.argNames.size(); i++) {
-			columnStates.add(new PairWiseState<>(args, i));
+			columnStates.add(new PairWiseState(argCounts, i));
 		}
 
 	}
