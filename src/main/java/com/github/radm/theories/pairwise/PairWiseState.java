@@ -12,17 +12,16 @@ import org.slf4j.LoggerFactory;
 public class PairWiseState {
 	private static final Logger LOG = LoggerFactory.getLogger(PairWiseState.class);
 
-	private final int thisColumnNo;
+	private final int column;
 	final int numColumnOptions;
 	private final List<SinglePairState> states;
 
 	public PairWiseState(int[] argCounts, int columnNumber, List<SinglePairState> states) {
-		this.thisColumnNo = columnNumber;
+		this.column = columnNumber;
 
 		this.numColumnOptions = argCounts[columnNumber];
 		this.states = states;
 	}
-
 
 	/**
 	 * Checks if all required values have been selected.
@@ -36,7 +35,7 @@ public class PairWiseState {
 
 	public int selectGiven(int[] partialSelection) {
 
-		LOG.trace("select colummn {} given {}", thisColumnNo, partialSelection);
+		LOG.trace("select colummn {} given {}", column, partialSelection);
 
 		int ret = -1;
 		double bestWeight = -1;
@@ -48,9 +47,21 @@ public class PairWiseState {
 				bestWeight = currWeight;
 			}
 		}
-		LOG.trace("selected {} for colummn {}", ret, thisColumnNo);
+		LOG.trace("selected {} for colummn {}", ret, column);
 
 		return ret;
+	}
+
+	public double globalDensity() {
+		double density = 0;
+		for (SinglePairState state : states) {
+
+			for (int selection = 0; selection < numColumnOptions; selection++) {
+				density += state.densityOf(column, selection);
+			}
+		}
+
+		return density;
 	}
 
 	private double calculateDensity(int[] partialSelection, int selection) {
@@ -58,27 +69,26 @@ public class PairWiseState {
 
 		for (SinglePairState state : states) {
 
-			final int otherColumn = state.otherColumn(thisColumnNo);
+			final int otherColumn = state.otherColumn(column);
 			if (partialSelection[otherColumn] >= 0) {
 				final int xSelection;
 				final int ySelection;
-				if (otherColumn > thisColumnNo) {
+				if (otherColumn > column) {
 					xSelection = selection;
 					ySelection = partialSelection[otherColumn];
 
-				}
-				else {
+				} else {
 					xSelection = partialSelection[otherColumn];
 					ySelection = selection;
 				}
 
 				if (!state.isSelected(xSelection, ySelection)) {
-					LOG.trace("{}={}, {}={} is new", thisColumnNo, selection, otherColumn, partialSelection[otherColumn]);
-					density += state.densityOf(thisColumnNo, selection);
+					LOG.trace("{}={}, {}={} is new", column, selection, otherColumn,
+							partialSelection[otherColumn]);
+					density += state.densityOf(column, selection);
 				}
-			}
-			else {
-				density += state.densityOf(thisColumnNo, selection);
+			} else {
+				density += state.densityOf(column, selection);
 			}
 		}
 
@@ -87,5 +97,13 @@ public class PairWiseState {
 		return density;
 	}
 
+	/**
+	 * Gets the column.
+	 *
+	 * @return the column
+	 */
+	public int getColumn() {
+		return column;
+	}
 
 }

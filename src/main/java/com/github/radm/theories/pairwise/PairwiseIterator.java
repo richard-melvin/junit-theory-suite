@@ -2,6 +2,7 @@ package com.github.radm.theories.pairwise;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -9,9 +10,10 @@ import java.util.List;
  * <a href="http://goo.gl/CLYJ1d">Prioritized interaction testing for pair-wise
  * coverage with seeding and constraints</a>.
  *
- * @param <T> underlying common type or arguments, usually Object.
+ * @param <T>
+ *            underlying common type or arguments, usually Object.
  */
-public class PairwiseIterator<T> extends ArgSetIterator<T>{
+public class PairwiseIterator<T> extends ArgSetIterator<T> {
 
 	private final List<PairWiseState> columnStates = new ArrayList<>();
 	private final SinglePairState[] cellStates;
@@ -24,7 +26,7 @@ public class PairwiseIterator<T> extends ArgSetIterator<T>{
 		int[] argCounts = args.argsValues.stream().mapToInt(List::size).toArray();
 
 		tableSize = argCounts.length;
-		cellStates = new SinglePairState[tableSize * tableSize ];
+		cellStates = new SinglePairState[tableSize * tableSize];
 
 		for (int i = 0; i < tableSize; i++) {
 			for (int j = 0; j < tableSize; j++) {
@@ -59,7 +61,6 @@ public class PairwiseIterator<T> extends ArgSetIterator<T>{
 
 	}
 
-
 	@Override
 	protected T[] computeNext() {
 
@@ -71,9 +72,13 @@ public class PairwiseIterator<T> extends ArgSetIterator<T>{
 		int[] selection = new int[tableSize];
 		Arrays.setAll(selection, i -> -1);
 
-//		List<PairWiseState> updateOrder = new ArrayList<>(columnStates);
-//		updateOrder.sort(Comparator.comparingInt(null));
+		List<PairWiseState> updateOrder = new ArrayList<>(columnStates);
+		updateOrder.sort(Comparator.comparingDouble(PairWiseState::globalDensity));
 
+		for (PairWiseState pws : updateOrder) {
+			selection[pws.getColumn()] = pws.selectGiven(selection);
+
+		}
 		for (int i = 0; i < selection.length; i++) {
 			selection[i] = columnStates.get(i).selectGiven(selection);
 		}
