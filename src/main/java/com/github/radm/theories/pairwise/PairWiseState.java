@@ -1,7 +1,5 @@
 package com.github.radm.theories.pairwise;
 
-import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -14,73 +12,17 @@ import org.slf4j.LoggerFactory;
 public class PairWiseState {
 	private static final Logger LOG = LoggerFactory.getLogger(PairWiseState.class);
 
-	private final int columnNumber;
-	private final int[] argCounts;
-	private final int numColumnOptions;
-	private final List<SinglePairState> states = new ArrayList<>();
+	private final int thisColumnNo;
+	final int numColumnOptions;
+	private final List<SinglePairState> states;
 
-	private class SinglePairState {
-		final BitSet selectedPairs;
-		final int[] selectionCount;
-		int numSelected;
-		final int numOptions;
-
-		public SinglePairState(int otherColumns) {
-			super();
-
-			numOptions = argCounts[otherColumns];
-			selectionCount = new int[numColumnOptions];
-			selectedPairs = new BitSet(numColumnOptions * numOptions);
-			numSelected = 0;
-		}
-
-		public void select(int otherColumnValue, int thisColumnValue) {
-			int index = numOptions * otherColumnValue + thisColumnValue;
-
-			if (!selectedPairs.get(index)) {
-				numSelected++;
-				selectionCount[thisColumnValue]++;
-				selectedPairs.set(index);
-			}
-		}
-
-		public boolean isSelected(int otherColumnValue, int thisColumnValue) {
-			int index = numOptions * otherColumnValue + thisColumnValue;
-
-			return selectedPairs.get(index);
-		}
-
-	}
-
-	public PairWiseState(int[] argCounts, int columnNumber) {
-		this.argCounts = argCounts;
-		this.columnNumber = columnNumber;
+	public PairWiseState(int[] argCounts, int columnNumber, List<SinglePairState> states) {
+		this.thisColumnNo = columnNumber;
 
 		this.numColumnOptions = argCounts[columnNumber];
-
-		for (int i = 0; i < argCounts.length; i++) {
-			if (i != columnNumber) {
-				states.add(new SinglePairState(i));
-			}
-		}
+		this.states = states;
 	}
 
-	/**
-	 * Access state, considering we left out the X=X case.
-	 *
-	 * @param column
-	 *            number
-	 * @return state for that column
-	 */
-	private SinglePairState getState(int col) {
-
-		if (col < columnNumber) {
-			return states.get(col);
-		} else if (col > columnNumber) {
-			return states.get(col - 1);
-		}
-		throw new AssertionError(col);
-	}
 
 	/**
 	 * Checks if all required values have been selected.
@@ -89,12 +31,12 @@ public class PairWiseState {
 	 */
 	public boolean isComplete() {
 
-		return states.stream().allMatch(sps -> sps.numSelected == sps.numOptions * numColumnOptions);
+		return states.stream().allMatch(sps -> sps.isComplete());
 	}
 
 	public int selectGiven(int[] partialSelection) {
 
-		LOG.trace("select colummn {} given {}", columnNumber, partialSelection);
+		LOG.trace("select colummn {} given {}", thisColumnNo, partialSelection);
 
 		int ret = -1;
 		double bestWeight = -1;
@@ -106,7 +48,7 @@ public class PairWiseState {
 				bestWeight = currWeight;
 			}
 		}
-		LOG.trace("selected {} for colummn {}", ret, columnNumber);
+		LOG.trace("selected {} for colummn {}", ret, thisColumnNo);
 
 		return ret;
 	}
@@ -114,41 +56,36 @@ public class PairWiseState {
 	private double calculateDensity(int[] partialSelection, int selection) {
 		double density = 0;
 
-		// calculate local density for fixed values
-		for (int i = 0; i < columnNumber; i++)
-		{
-			SinglePairState state = getState(i);
-			final double target = (double) state.numOptions;
-			if (!state.isSelected(partialSelection[i], selection)) {
-				density += (1.0 - state.selectionCount[selection] / target);
-				LOG.trace("extra density for new pair [{},{}] is {}", partialSelection[i], selection, density);
+		for (SinglePairState state : states) {
 
+			final int otherColumn = state.otherColumn(thisColumnNo);
+			if (partialSelection[otherColumn] >= 0) {
+				final int xSelection;
+				final int ySelection;
+				if (otherColumn > thisColumnNo) {
+					xSelection = selection;
+					ySelection = partialSelection[otherColumn];
+
+				}
+				else {
+					xSelection = partialSelection[otherColumn];
+					ySelection = selection;
+				}
+
+				if (!state.isSelected(xSelection, ySelection)) {
+					LOG.trace("{}={}, {}={} is new", thisColumnNo, selection, otherColumn, partialSelection[otherColumn]);
+					density += state.densityOf(thisColumnNo, selection);
+				}
+			}
+			else {
+				density += state.densityOf(thisColumnNo, selection);
 			}
 		}
 
-		// calculate global density for fixed values
-		for (int i = columnNumber + 1; i < partialSelection.length; i++)
-		{
-			SinglePairState state = getState(i);
-			final double target = (double) ( state.numOptions);
-
-			density += (1.0 - state.selectionCount[selection] / target);
-
-		}
 		LOG.trace("density of {} is {}", selection, density);
 
 		return density;
 	}
 
-	public void flagAsSelected(int[] completeSelection) {
 
-		for (int i = 0; i < completeSelection.length; i++) {
-
-			if (i != columnNumber) {
-				SinglePairState state = getState(i);
-
-				state.select(completeSelection[i], completeSelection[columnNumber]);
-			}
-		}
-	}
 }

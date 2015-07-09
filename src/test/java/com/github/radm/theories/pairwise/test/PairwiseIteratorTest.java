@@ -96,6 +96,7 @@ public class PairwiseIteratorTest extends ArgumentSetTest {
 
 			LOG.debug("got {}", Arrays.toString(next));
 		}
+		LOG.info("length of {} is {}", as.getArgNames(), count);
 		return count;
 	}
 
