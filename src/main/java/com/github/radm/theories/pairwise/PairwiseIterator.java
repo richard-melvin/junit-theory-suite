@@ -17,7 +17,7 @@ import java.util.stream.IntStream;
 public class PairwiseIterator extends ArgSetIterator {
 
 	private final List<PairWiseState> columnStates = new ArrayList<>();
-	private final SinglePairState[] cellStates;
+	private final List<SinglePairState> cellStates;
 
 	private final int tableSize;
 
@@ -29,23 +29,21 @@ public class PairwiseIterator extends ArgSetIterator {
 		int[] argCounts = args.argsValues.stream().mapToInt(List::size).toArray();
 
 		tableSize = argCounts.length;
-		cellStates = new SinglePairState[tableSize * tableSize];
+		cellStates = new ArrayList<>((tableSize * (tableSize - 1)) / 2);
 
 		for (int i = 0; i < tableSize; i++) {
 			for (int j = 0; j < tableSize; j++) {
 				if (i < j) {
-					cellStates[getStateIndex(i, j)] = new SinglePairState(i, j, argCounts);
+					cellStates.add(new SinglePairState(i, j, argCounts));
 				}
 			}
 		}
 
 		for (int i = 0; i < tableSize; i++) {
+			final int col = i;
 			List<SinglePairState> crossStates = new ArrayList<>(tableSize - 1);
-			for (int j = 0; j < tableSize; j++) {
-				if (i != j) {
-					crossStates.add(cellStates[getStateIndex(i, j)]);
-				}
-			}
+
+			cellStates.stream().filter(cs -> cs.colOne == col || cs.colTwo == col).forEach(crossStates::add);
 
 			columnStates.add(new PairWiseState(argCounts, i, crossStates));
 		}
@@ -53,21 +51,8 @@ public class PairwiseIterator extends ArgSetIterator {
 		hasConstraint = IntStream.range(0, tableSize).anyMatch(i -> args.getConstraint(i) != null);
 	}
 
-	private int getStateIndex(int row, int col) {
-		assert row != col;
-		assert row < tableSize;
-		assert col < tableSize;
-
-		if (col < row) {
-			return getStateIndex(col, row);
-		}
-		return col * tableSize + row;
-
-	}
-
 	@Override
 	protected Object[] computeNext() {
-
 
 		int[] selection = new int[tableSize];
 		Arrays.setAll(selection, i -> -1);
@@ -91,47 +76,45 @@ public class PairwiseIterator extends ArgSetIterator {
 		}
 
 		for (SinglePairState sps : cellStates) {
-			if (sps != null) {
-				sps.select(selection[sps.colOne], selection[sps.colTwo]);
-			}
+			sps.select(selection[sps.colOne], selection[sps.colTwo]);
 		}
 
 		return fillIn(selection);
 	}
 
 	private void constrainedSelect(List<PairWiseState> updateOrder, int[] selection) {
-//		List<List<Integer>> sortedArgs = new ArrayList<>(tableSize);
-//
-//		for (PairWiseState pws : updateOrder) {
-//			final List<Integer> optionsByCoverage = pws.selectGiven(selection);
-//			selection[pws.getColumn()] = optionsByCoverage.get(0);
-//			sortedArgs.add(optionsByCoverage);
-//		}
-//
-//		ArgumentSet<Intege newArgs = new ArgumentSet<>(args.argNames, sortedArgs);
-//
-//		for (int i = 0; i < tableSize; i++) {
-//			final Predicate<T[]> constraint = args.getConstraint(i);
-//			if (constraint != null) {
-//				final Predicate<Integer[]> wrappedConstraint = objs -> constraint.test(fillIn(objs));
-//
-//				newArgs.withConstraint(args.argNames.get(i), wrappedConstraint);
-//			}
-//		}
-//
-//		Iterator<Integer[]> iterator = newArgs.iterator();
-//		if (iterator.hasNext()) {
-//			final Integer[] constrainedSelection = iterator.next();
-//
-//			for (int i = 0; i < selection.length; i++) {
-//				selection[i] = constrainedSelection[i];
-//			}
-//		} else {
-//			knownComplete = true;
-//		}
+		// List<List<Integer>> sortedArgs = new ArrayList<>(tableSize);
+		//
+		// for (PairWiseState pws : updateOrder) {
+		// final List<Integer> optionsByCoverage = pws.selectGiven(selection);
+		// selection[pws.getColumn()] = optionsByCoverage.get(0);
+		// sortedArgs.add(optionsByCoverage);
+		// }
+		//
+		// ArgumentSet<Intege newArgs = new ArgumentSet<>(args.argNames,
+		// sortedArgs);
+		//
+		// for (int i = 0; i < tableSize; i++) {
+		// final Predicate<T[]> constraint = args.getConstraint(i);
+		// if (constraint != null) {
+		// final Predicate<Integer[]> wrappedConstraint = objs ->
+		// constraint.test(fillIn(objs));
+		//
+		// newArgs.withConstraint(args.argNames.get(i), wrappedConstraint);
+		// }
+		// }
+		//
+		// Iterator<Integer[]> iterator = newArgs.iterator();
+		// if (iterator.hasNext()) {
+		// final Integer[] constrainedSelection = iterator.next();
+		//
+		// for (int i = 0; i < selection.length; i++) {
+		// selection[i] = constrainedSelection[i];
+		// }
+		// } else {
+		// knownComplete = true;
+		// }
 	}
-
-
 
 	private Object[] fillIn(int[] selection) {
 
