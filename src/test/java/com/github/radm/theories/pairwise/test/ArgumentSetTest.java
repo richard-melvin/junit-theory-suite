@@ -15,42 +15,42 @@ import com.github.radm.theories.pairwise.ArgumentSet;
 @RunWith(Theories.class)
 public abstract class ArgumentSetTest {
 
-	public static @DataPoint ArgumentSet<Boolean> oneBoolean = new ArgumentSet<>(Arrays.asList("a"),
+	public static @DataPoint ArgumentSet oneBoolean = new ArgumentSet(Arrays.asList("a"),
 			Arrays.asList(Arrays.asList(true, false)));
 
-	public static @DataPoint ArgumentSet<Boolean> twoBooleans = makeTwoBooleans();
+	public static @DataPoint ArgumentSet twoBooleans = makeTwoBooleans();
 
-	private static ArgumentSet<Boolean> makeTwoBooleans() {
-		return new ArgumentSet<>(Arrays.asList("a", "b"),
+	private static ArgumentSet makeTwoBooleans() {
+		return new ArgumentSet(Arrays.asList("a", "b"),
 				Arrays.asList(Arrays.asList(true, false), Arrays.asList(false, true)));
 	}
 
-	public static @DataPoint ArgumentSet<Integer> threeIntegers = makeThreeIntegers();
+	public static @DataPoint ArgumentSet threeIntegers = makeThreeIntegers();
 
-	private static ArgumentSet<Integer> makeThreeIntegers() {
-		return new ArgumentSet<>(Arrays.asList("a", "b", "c"),
+	private static ArgumentSet makeThreeIntegers() {
+		return new ArgumentSet(Arrays.asList("a", "b", "c"),
 				Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(1, 2, 3), Arrays.asList(1, 2, 3)));
 	}
 
-	public static @DataPoint ArgumentSet<DayOfWeek> fourDays = makeFourDays();
+	public static @DataPoint ArgumentSet fourDays = makeFourDays();
 
-	private static ArgumentSet<DayOfWeek> makeFourDays() {
+	private static ArgumentSet makeFourDays() {
 		return ArgumentSet.fromArray(Arrays.asList("a", "b", "c", "d"),
 				Arrays.asList(DayOfWeek.values(), DayOfWeek.values(),
 						DayOfWeek.values(), DayOfWeek.values()));
 	}
 
-	public static @DataPoint ArgumentSet<DayOfWeek> fourWeekDays = makeFourDays()
+	public static @DataPoint ArgumentSet fourWeekDays = makeFourDays()
 			.withConstraint("a", args -> isWeekDay((DayOfWeek) args[0]))
 			.withConstraint("b", args -> isWeekDay((DayOfWeek) args[1]))
 			.withConstraint("c", args -> isWeekDay((DayOfWeek) args[2]))
 			.withConstraint("d", args -> isWeekDay((DayOfWeek) args[3]));
 
 
-	public static @DataPoint ArgumentSet<Boolean> twoBooleansConstrained = makeTwoBooleans()
+	public static @DataPoint ArgumentSet twoBooleansConstrained = makeTwoBooleans()
 			.withConstraint("a", args -> (Boolean) args[0]);
 
-	public static @DataPoint ArgumentSet<Integer> threeIntsConstrained = makeThreeIntegers().withConstraint("c",
+	public static @DataPoint ArgumentSet threeIntsConstrained = makeThreeIntegers().withConstraint("c",
 			args -> isOdd((Integer) args[0]) && isOdd((Integer) args[1]) && isOdd((Integer) args[2]));
 
 	private static boolean isOdd(int i) {

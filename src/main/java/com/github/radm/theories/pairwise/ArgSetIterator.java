@@ -7,16 +7,16 @@ import java.util.Iterator;
  *
  * @param <T> the generic type
  */
-public abstract class ArgSetIterator<T> implements Iterator<T[]> {
+public abstract class ArgSetIterator implements Iterator<Object[]> {
 
-	protected final ArgumentSet<T> args;
+	protected final ArgumentSet args;
 
 	protected boolean knownComplete = false;
-	protected T[] nextValue = null;
+	protected Object[] nextValue = null;
 
-	protected abstract T[] computeNext();
+	protected abstract Object[] computeNext();
 
-	protected ArgSetIterator(ArgumentSet<T> args) {
+	protected ArgSetIterator(ArgumentSet args) {
 		this.args = args;
 
 	}
@@ -37,9 +37,9 @@ public abstract class ArgSetIterator<T> implements Iterator<T[]> {
 	}
 
 	@Override
-	public T[] next() {
+	public Object[] next() {
 		assert nextValue != null;
-		T[] ret = nextValue;
+		Object[] ret = nextValue;
 		nextValue = null;
 		return ret;
 	}

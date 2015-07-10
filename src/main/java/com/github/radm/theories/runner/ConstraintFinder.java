@@ -136,7 +136,7 @@ public class ConstraintFinder {
 	 * @param as
 	 *            the as
 	 */
-	public void applyConstraintsTo(FrameworkMethod fm, ArgumentSet<Object> as) {
+	public void applyConstraintsTo(FrameworkMethod fm, ArgumentSet as) {
 
 		MethodSignature testSignature = new MethodSignature(fm);
 
@@ -153,7 +153,7 @@ public class ConstraintFinder {
 
 	}
 
-	private void applyTo(MethodSignature constraint, MethodSignature testSignature, ArgumentSet<Object> as) {
+	private void applyTo(MethodSignature constraint, MethodSignature testSignature, ArgumentSet as) {
 
 		for (MethodSignature.Shim argMapping : constraint.buildShims(testSignature)) {
 

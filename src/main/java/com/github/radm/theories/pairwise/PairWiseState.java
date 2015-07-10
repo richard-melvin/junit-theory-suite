@@ -1,6 +1,9 @@
 package com.github.radm.theories.pairwise;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,21 +36,24 @@ public class PairWiseState {
 		return states.stream().allMatch(sps -> sps.isComplete());
 	}
 
-	public int selectGiven(int[] partialSelection) {
+	public List<Integer> selectGiven(int[] partialSelection) {
 
 		LOG.trace("select colummn {} given {}", column, partialSelection);
 
-		int ret = -1;
-		double bestWeight = -1;
+		double[] weights = new double[numColumnOptions];
 		for (int selection = 0; selection < numColumnOptions; selection++) {
 
-			double currWeight = calculateDensity(partialSelection, selection);
-			if (currWeight > bestWeight) {
-				ret = selection;
-				bestWeight = currWeight;
-			}
+			weights[selection] = calculateDensity(partialSelection, selection);
+
 		}
-		LOG.trace("selected {} for colummn {}", ret, column);
+
+		List<Integer> ret = IntStream.range(0, numColumnOptions).boxed().collect(Collectors.toList());
+
+		ret.sort(Comparator.comparing(i -> -weights[i]));
+
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("selected {} for colummn {}", ret, column);
+		}
 
 		return ret;
 	}

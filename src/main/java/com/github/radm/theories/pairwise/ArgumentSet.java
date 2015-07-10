@@ -17,11 +17,11 @@ import org.slf4j.LoggerFactory;
  * They should then prevent all matching sets values from being returned.
  *
  */
-public class ArgumentSet<T> implements Iterable<T[]> {
+public class ArgumentSet implements Iterable<Object[]> {
 
 	static final Logger LOG = LoggerFactory.getLogger(ArgumentSet.class);
 	final List<String> argNames;
-	final List<List<T>> argsValues;
+	final List<List<Object>> argsValues;
 
 	private final Map<String, Predicate<Object[]>> constraints = new HashMap<>();
 
@@ -33,7 +33,7 @@ public class ArgumentSet<T> implements Iterable<T[]> {
 	 * @param argsValues
 	 *            the args values
 	 */
-	public ArgumentSet(List<String> argNames, List<List<T>> argsValues) {
+	public ArgumentSet(List<String> argNames, List<List<Object>> argsValues) {
 		super();
 		this.argNames = argNames;
 		this.argsValues = argsValues;
@@ -49,16 +49,16 @@ public class ArgumentSet<T> implements Iterable<T[]> {
 	 * @param argsValues the arg values
 	 * @return the argument set
 	 */
-	public static <T> ArgumentSet<T> fromArray(List<String> argNames, List<T[]> argsValues) {
+	public static ArgumentSet fromArray(List<String> argNames, List<Object[]> argsValues) {
 
-		List <List<T>> vals = new ArrayList<>(argsValues.size());
+		List <List<Object>> vals = new ArrayList<>(argsValues.size());
 
-		for (T[] o : argsValues)
+		for (Object[] o : argsValues)
 		{
 			vals.add(Arrays.asList(o));
 		}
 
-		return new ArgumentSet<>(argNames, vals);
+		return new ArgumentSet(argNames, vals);
 	}
 
 
@@ -70,7 +70,7 @@ public class ArgumentSet<T> implements Iterable<T[]> {
 	 * @param constraint
 	 *            the constraint
 	 */
-	public ArgumentSet<T> withConstraint(String argName, Predicate<Object[]> constraint) {
+	public ArgumentSet withConstraint(String argName, Predicate<Object[]> constraint) {
 		Predicate<Object[]> existing = constraints.get(argName);
 		if (existing == null) {
 			constraints.put(argName, constraint);
@@ -96,21 +96,21 @@ public class ArgumentSet<T> implements Iterable<T[]> {
 	 * Iterate over all possible values of combinations or argument values
 	 */
 	@Override
-	public Iterator<T[]> iterator() {
-		return new ExhaustiveIterator<T>(this);
+	public Iterator<Object[]> iterator() {
+		return new ExhaustiveIterator(this);
 	}
 
 	/**
 	 * Iterate over all pairwise combinations of argument values
 	 */
-	public Iterator<T[]> pairwiseIterator() {
+	public Iterator<Object[]> pairwiseIterator() {
 
 		// no point doing pairwise logic for small cases
 		if (argNames.size() <= 2) {
 			return iterator();
 		}
 
-		return new PairwiseIterator<T>(this);
+		return new PairwiseIterator(this);
 	}
 
 

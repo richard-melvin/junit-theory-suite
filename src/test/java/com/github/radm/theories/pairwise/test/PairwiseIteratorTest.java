@@ -53,7 +53,7 @@ public class PairwiseIteratorTest extends ArgumentSetTest {
 
 	@Test
 	public void expectedLength6() {
-		assertTrue(61 >= countArguments(fourDays));
+		assertTrue(63 >= countArguments(fourDays));
 	}
 
 	@Test
@@ -64,7 +64,7 @@ public class PairwiseIteratorTest extends ArgumentSetTest {
 
 
 	@Theory
-	public void canIterateWithoutGettingNull(ArgumentSet<? extends Object> as) {
+	public void canIterateWithoutGettingNull(ArgumentSet as) {
 		for (Object[] args : as) {
 			assertNotNull(args);
 			for (Object o : args) {
@@ -74,7 +74,7 @@ public class PairwiseIteratorTest extends ArgumentSetTest {
 	}
 
 	@Theory
-	public void canCallHasNextFreely(ArgumentSet<? extends Object> as) {
+	public void canCallHasNextFreely(ArgumentSet as) {
 
 		Iterator<?> iter = as.iterator();
 
@@ -86,7 +86,7 @@ public class PairwiseIteratorTest extends ArgumentSetTest {
 
 	}
 
-	private int countArguments(ArgumentSet<? extends Object> as) {
+	private int countArguments(ArgumentSet as) {
 		Iterator<?> iter = as.pairwiseIterator();
 
 		int count = 0;

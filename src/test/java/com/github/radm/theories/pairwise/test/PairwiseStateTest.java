@@ -49,8 +49,8 @@ public class PairwiseStateTest {
 	@Test
 	public void firstSelection() {
 
-		assertEquals(0, twoBoolState[0].selectGiven(new int[] {-1,-1}));
-		assertEquals(0, twoBoolState[1].selectGiven(new int[] {0,-1}));
+		assertEquals(0, twoBoolState[0].selectGiven(new int[] {-1,-1}).get(0).intValue());
+		assertEquals(0, twoBoolState[1].selectGiven(new int[] {0,-1}).get(0).intValue());
 
 	}
 
@@ -59,8 +59,8 @@ public class PairwiseStateTest {
 
 		onlyPair.select(0, 0);
 
-		assertEquals(1, twoBoolState[0].selectGiven(new int[] {-1,-1}));
-		assertEquals(1, twoBoolState[1].selectGiven(new int[] {1,-1}));
+		assertEquals(1, twoBoolState[0].selectGiven(new int[] {-1,-1}).get(0).intValue());
+		assertEquals(1, twoBoolState[1].selectGiven(new int[] {1,-1}).get(0).intValue());
 	}
 
 
@@ -70,8 +70,8 @@ public class PairwiseStateTest {
 		onlyPair.select(0, 0);
 		onlyPair.select(1, 1);
 
-		assertEquals(0, twoBoolState[0].selectGiven(new int[] {-1,-1}));
-		assertEquals(2, twoBoolState[1].selectGiven(new int[] {0,-1}));
+		assertEquals(0, twoBoolState[0].selectGiven(new int[] {-1,-1}).get(0).intValue());
+		assertEquals(2, twoBoolState[1].selectGiven(new int[] {0,-1}).get(0).intValue());
 	}
 
 
@@ -83,7 +83,7 @@ public class PairwiseStateTest {
 		onlyPair.select(0, 2);
 		onlyPair.select(1, 0);
 
-		assertEquals(1, twoBoolState[0].selectGiven(new int[] {-1,-1}));
-		assertEquals(2, twoBoolState[1].selectGiven(new int[] {1,-1}));
+		assertEquals(1, twoBoolState[0].selectGiven(new int[] {-1,-1}).get(0).intValue());
+		assertEquals(2, twoBoolState[1].selectGiven(new int[] {1,-1}).get(0).intValue());
 	}
 }

@@ -8,21 +8,21 @@ import java.util.function.Predicate;
  * Exhaustively iterate over the contents of an argset, while applying
  * constraints.
  */
-public class ExhaustiveIterator<T> extends ArgSetIterator<T> {
+public class ExhaustiveIterator extends ArgSetIterator {
 
-	private Iterator<? extends T> valIter;
-	private final ExhaustiveIterator<T> nextColumn;
-	private final ExhaustiveIterator<T> prevColumn;
+	private Iterator<Object> valIter;
+	private final ExhaustiveIterator nextColumn;
+	private final ExhaustiveIterator prevColumn;
 
-	T currValue;
+	Object currValue;
 	private final int argIndex;
 	private final Predicate<Object[]> predicate;
 
-	ExhaustiveIterator(ArgumentSet<T> argumentSet) {
+	ExhaustiveIterator(ArgumentSet argumentSet) {
 		this(argumentSet, null);
 	}
 
-	private ExhaustiveIterator(ArgumentSet<T> argumentSet, ExhaustiveIterator<T> prevColumn) {
+	private ExhaustiveIterator(ArgumentSet argumentSet, ExhaustiveIterator prevColumn) {
 
 		super(argumentSet);
 		this.prevColumn = prevColumn;
@@ -39,13 +39,13 @@ public class ExhaustiveIterator<T> extends ArgSetIterator<T> {
 
 	}
 
-	private Iterator<? extends T> makeIter() {
+	private Iterator<Object> makeIter() {
 		return args.argsValues.get(argIndex).iterator();
 	}
 
-	private ExhaustiveIterator<T> makeNextColumn() {
+	private ExhaustiveIterator makeNextColumn() {
 		if (argIndex < args.argNames.size() - 1) {
-			return new ExhaustiveIterator<T>(args, this);
+			return new ExhaustiveIterator(args, this);
 		} else {
 			return null;
 		}
@@ -53,7 +53,7 @@ public class ExhaustiveIterator<T> extends ArgSetIterator<T> {
 
 
 	@Override
-	protected T[] computeNext() {
+	protected Object[] computeNext() {
 		if (predicate == null)
 		{
 			return computeNextSimple();
@@ -62,8 +62,8 @@ public class ExhaustiveIterator<T> extends ArgSetIterator<T> {
 	}
 
 
-	protected T[] computeNextPassingPredicate() {
-		T[] candidate = computeNextSimple();
+	protected Object[] computeNextPassingPredicate() {
+		Object[] candidate = computeNextSimple();
 		boolean requiresReset = false;
 		while (!predicate.test(populateResult()) && !knownComplete) {
 			if (ArgumentSet.LOG.isTraceEnabled()) {
@@ -94,7 +94,7 @@ public class ExhaustiveIterator<T> extends ArgSetIterator<T> {
 	 *
 	 * @return next object, or null.
 	 */
-	protected T[] computeNextSimple() {
+	protected Object[] computeNextSimple() {
 
 		if (nextColumn == null) {
 			if (valIter.hasNext()) {
@@ -126,17 +126,16 @@ public class ExhaustiveIterator<T> extends ArgSetIterator<T> {
 
 	}
 
-	@SuppressWarnings("unchecked")
-	private T[] populateResult() {
+	private Object[] populateResult() {
 		Object[] ret = new Object[argIndex + 1];
 
-		ExhaustiveIterator<T> it = this;
+		ExhaustiveIterator it = this;
 		for (int i = ret.length - 1; i >= 0; i--) {
 			ret[i] = it.currValue;
 			it = it.prevColumn;
 		}
 
-		return (T[]) ret;
+		return ret;
 	}
 
 	private void reset() {

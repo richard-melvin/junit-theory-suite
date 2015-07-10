@@ -72,7 +72,7 @@ public class ArgumentGenerator {
 			allArgValues.add(argVal);
 		}
 
-		ArgumentSet<Object> as = new ArgumentSet<>(colNames, allArgValues);
+		ArgumentSet as = new ArgumentSet(colNames, allArgValues);
 		constraints.applyConstraintsTo(testMethod, as);
 
 		for (Object[] rawArgs : as) {

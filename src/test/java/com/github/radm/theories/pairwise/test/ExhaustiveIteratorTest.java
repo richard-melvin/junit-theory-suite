@@ -55,7 +55,7 @@ public class ExhaustiveIteratorTest extends ArgumentSetTest {
 
 
 	@Theory
-	public void canIterateWithoutGettingNull(ArgumentSet<? extends Object> as) {
+	public void canIterateWithoutGettingNull(ArgumentSet as) {
 		for (Object[] args : as) {
 			assertNotNull(args);
 			for (Object o : args) {
@@ -65,7 +65,7 @@ public class ExhaustiveIteratorTest extends ArgumentSetTest {
 	}
 
 	@Theory
-	public void canCallHasNextFreely(ArgumentSet<? extends Object> as) {
+	public void canCallHasNextFreely(ArgumentSet as) {
 
 		Iterator<?> iter = as.iterator();
 
@@ -78,7 +78,7 @@ public class ExhaustiveIteratorTest extends ArgumentSetTest {
 	}
 
 
-	protected int countArguments(ArgumentSet<? extends Object> as) {
+	protected int countArguments(ArgumentSet as) {
 		Iterator<?> iter = as.iterator();
 
 		int count = 0;

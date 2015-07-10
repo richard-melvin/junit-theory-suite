@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * Pairwise coverage iteration, based on a variant of the algorithm specified in
@@ -13,14 +14,16 @@ import java.util.List;
  * @param <T>
  *            underlying common type or arguments, usually Object.
  */
-public class PairwiseIterator<T> extends ArgSetIterator<T> {
+public class PairwiseIterator extends ArgSetIterator {
 
 	private final List<PairWiseState> columnStates = new ArrayList<>();
 	private final SinglePairState[] cellStates;
 
 	private final int tableSize;
 
-	protected PairwiseIterator(ArgumentSet<T> args) {
+	private final boolean hasConstraint;
+
+	protected PairwiseIterator(ArgumentSet args) {
 		super(args);
 
 		int[] argCounts = args.argsValues.stream().mapToInt(List::size).toArray();
@@ -47,6 +50,7 @@ public class PairwiseIterator<T> extends ArgSetIterator<T> {
 			columnStates.add(new PairWiseState(argCounts, i, crossStates));
 		}
 
+		hasConstraint = IntStream.range(0, tableSize).anyMatch(i -> args.getConstraint(i) != null);
 	}
 
 	private int getStateIndex(int row, int col) {
@@ -62,25 +66,28 @@ public class PairwiseIterator<T> extends ArgSetIterator<T> {
 	}
 
 	@Override
-	protected T[] computeNext() {
+	protected Object[] computeNext() {
 
-		if (isCoverageComplete()) {
-			knownComplete = true;
-			return null;
-		}
 
 		int[] selection = new int[tableSize];
 		Arrays.setAll(selection, i -> -1);
 
 		List<PairWiseState> updateOrder = new ArrayList<>(columnStates);
-		updateOrder.sort(Comparator.comparingDouble(PairWiseState::globalDensity));
+		updateOrder.sort(Comparator.comparingDouble(PairWiseState::globalDensity).reversed());
 
-		for (PairWiseState pws : updateOrder) {
-			selection[pws.getColumn()] = pws.selectGiven(selection);
-
-		}
-		for (int i = 0; i < selection.length; i++) {
-			selection[i] = columnStates.get(i).selectGiven(selection);
+		if (hasConstraint) {
+			constrainedSelect(updateOrder, selection);
+			if (knownComplete) {
+				return null;
+			}
+		} else {
+			if (isCoverageComplete()) {
+				knownComplete = true;
+				return null;
+			}
+			for (PairWiseState pws : updateOrder) {
+				selection[pws.getColumn()] = pws.selectGiven(selection).get(0);
+			}
 		}
 
 		for (SinglePairState sps : cellStates) {
@@ -92,10 +99,43 @@ public class PairwiseIterator<T> extends ArgSetIterator<T> {
 		return fillIn(selection);
 	}
 
-	private T[] fillIn(int[] selection) {
+	private void constrainedSelect(List<PairWiseState> updateOrder, int[] selection) {
+//		List<List<Integer>> sortedArgs = new ArrayList<>(tableSize);
+//
+//		for (PairWiseState pws : updateOrder) {
+//			final List<Integer> optionsByCoverage = pws.selectGiven(selection);
+//			selection[pws.getColumn()] = optionsByCoverage.get(0);
+//			sortedArgs.add(optionsByCoverage);
+//		}
+//
+//		ArgumentSet<Intege newArgs = new ArgumentSet<>(args.argNames, sortedArgs);
+//
+//		for (int i = 0; i < tableSize; i++) {
+//			final Predicate<T[]> constraint = args.getConstraint(i);
+//			if (constraint != null) {
+//				final Predicate<Integer[]> wrappedConstraint = objs -> constraint.test(fillIn(objs));
+//
+//				newArgs.withConstraint(args.argNames.get(i), wrappedConstraint);
+//			}
+//		}
+//
+//		Iterator<Integer[]> iterator = newArgs.iterator();
+//		if (iterator.hasNext()) {
+//			final Integer[] constrainedSelection = iterator.next();
+//
+//			for (int i = 0; i < selection.length; i++) {
+//				selection[i] = constrainedSelection[i];
+//			}
+//		} else {
+//			knownComplete = true;
+//		}
+	}
 
-		@SuppressWarnings("unchecked")
-		T[] ret = (T[]) new Object[selection.length];
+
+
+	private Object[] fillIn(int[] selection) {
+
+		Object[] ret = new Object[selection.length];
 
 		for (int i = 0; i < selection.length; i++) {
 			ret[i] = args.argsValues.get(i).get(selection[i]);
