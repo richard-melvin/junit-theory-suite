@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 /**
@@ -58,9 +59,8 @@ public class PairwiseIterator extends ArgSetIterator {
 		Arrays.setAll(selection, i -> -1);
 
 		List<PairWiseState> updateOrder = new ArrayList<>(columnStates);
-		updateOrder.sort(Comparator.comparingDouble(PairWiseState::globalDensity).reversed());
-
 		if (hasConstraint) {
+
 			constrainedSelect(updateOrder, selection);
 			if (knownComplete) {
 				return null;
@@ -70,6 +70,7 @@ public class PairwiseIterator extends ArgSetIterator {
 				knownComplete = true;
 				return null;
 			}
+			updateOrder.sort(Comparator.comparingDouble(PairWiseState::globalDensity).reversed());
 			for (PairWiseState pws : updateOrder) {
 				selection[pws.getColumn()] = pws.selectGiven(selection).get(0);
 			}
@@ -83,37 +84,39 @@ public class PairwiseIterator extends ArgSetIterator {
 	}
 
 	private void constrainedSelect(List<PairWiseState> updateOrder, int[] selection) {
-		// List<List<Integer>> sortedArgs = new ArrayList<>(tableSize);
-		//
-		// for (PairWiseState pws : updateOrder) {
-		// final List<Integer> optionsByCoverage = pws.selectGiven(selection);
-		// selection[pws.getColumn()] = optionsByCoverage.get(0);
-		// sortedArgs.add(optionsByCoverage);
-		// }
-		//
-		// ArgumentSet<Intege newArgs = new ArgumentSet<>(args.argNames,
-		// sortedArgs);
-		//
-		// for (int i = 0; i < tableSize; i++) {
-		// final Predicate<T[]> constraint = args.getConstraint(i);
-		// if (constraint != null) {
-		// final Predicate<Integer[]> wrappedConstraint = objs ->
-		// constraint.test(fillIn(objs));
-		//
-		// newArgs.withConstraint(args.argNames.get(i), wrappedConstraint);
-		// }
-		// }
-		//
-		// Iterator<Integer[]> iterator = newArgs.iterator();
-		// if (iterator.hasNext()) {
-		// final Integer[] constrainedSelection = iterator.next();
-		//
-		// for (int i = 0; i < selection.length; i++) {
-		// selection[i] = constrainedSelection[i];
-		// }
-		// } else {
-		// knownComplete = true;
-		// }
+
+		final int size = updateOrder.size();
+		for (int i = 0; i < size; i++) {
+			final int col = i;
+			PairWiseState pws = updateOrder.get(col);
+
+			final List<Integer> sortedOptions = pws.selectGiven(selection);
+
+			final Predicate<Object[]> constraint = args.getConstraint(col);
+			if (constraint != null) {
+
+				final Predicate<Integer> wrappedConstraint = objs -> !constraint.test(fillIn(selection, objs, col));
+				sortedOptions.removeIf(wrappedConstraint);
+			}
+
+			if (!sortedOptions.isEmpty()) {
+				selection[pws.getColumn()] = sortedOptions.get(0);
+			}
+			else {
+				// TODO
+				knownComplete = true;
+			}
+		}
+
+
+	}
+
+	private Object[] fillIn(int[] selection, int extraValue, int col) {
+
+		int[] extraSelection = selection.clone();
+
+		extraSelection[col] = extraValue;
+		return fillIn(extraSelection);
 	}
 
 	private Object[] fillIn(int[] selection) {

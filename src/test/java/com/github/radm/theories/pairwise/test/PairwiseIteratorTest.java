@@ -48,7 +48,7 @@ public class PairwiseIteratorTest extends ArgumentSetTest {
 	@Test
 	@Ignore
 	public void expectedLength5() {
-		assertTrue(11 >= countArguments(threeIntsConstrained));
+		assertTrue(4 == countArguments(threeIntsConstrained));
 	}
 
 	@Test
