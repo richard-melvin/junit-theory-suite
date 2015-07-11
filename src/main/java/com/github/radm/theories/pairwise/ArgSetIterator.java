@@ -5,16 +5,15 @@ import java.util.Iterator;
 /**
  * Iterator over the contents of an argset.
  *
- * @param <T> the generic type
  */
-public abstract class ArgSetIterator implements Iterator<Object[]> {
+public abstract class ArgSetIterator implements Iterator<ArgVector> {
 
 	protected final ArgumentSet args;
 
 	protected boolean knownComplete = false;
-	protected Object[] nextValue = null;
+	protected ArgVector nextValue = null;
 
-	protected abstract Object[] computeNext();
+	protected abstract ArgVector computeNext();
 
 	protected ArgSetIterator(ArgumentSet args) {
 		this.args = args;
@@ -37,9 +36,9 @@ public abstract class ArgSetIterator implements Iterator<Object[]> {
 	}
 
 	@Override
-	public Object[] next() {
+	public ArgVector next() {
 		assert nextValue != null;
-		Object[] ret = nextValue;
+		ArgVector ret = nextValue;
 		nextValue = null;
 		return ret;
 	}

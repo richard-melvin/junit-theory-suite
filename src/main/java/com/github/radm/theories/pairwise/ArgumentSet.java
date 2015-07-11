@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * They should then prevent all matching sets values from being returned.
  *
  */
-public class ArgumentSet implements Iterable<Object[]> {
+public class ArgumentSet implements Iterable<ArgVector> {
 
 	static final Logger LOG = LoggerFactory.getLogger(ArgumentSet.class);
 	final List<String> argNames;
@@ -96,14 +96,14 @@ public class ArgumentSet implements Iterable<Object[]> {
 	 * Iterate over all possible values of combinations or argument values
 	 */
 	@Override
-	public Iterator<Object[]> iterator() {
+	public Iterator<ArgVector> iterator() {
 		return new ExhaustiveIterator(this);
 	}
 
 	/**
 	 * Iterate over all pairwise combinations of argument values
 	 */
-	public Iterator<Object[]> pairwiseIterator() {
+	public Iterator<ArgVector> pairwiseIterator() {
 
 		// no point doing pairwise logic for small cases
 		if (argNames.size() <= 2) {

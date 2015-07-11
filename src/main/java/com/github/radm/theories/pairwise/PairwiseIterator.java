@@ -1,7 +1,6 @@
 package com.github.radm.theories.pairwise;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
@@ -53,10 +52,9 @@ public class PairwiseIterator extends ArgSetIterator {
 	}
 
 	@Override
-	protected Object[] computeNext() {
+	protected ArgVector computeNext() {
 
-		int[] selection = new int[tableSize];
-		Arrays.setAll(selection, i -> -1);
+		ArgVector selection = new ArgVector(args);
 
 		List<PairWiseState> updateOrder = new ArrayList<>(columnStates);
 		if (hasConstraint) {
@@ -72,35 +70,35 @@ public class PairwiseIterator extends ArgSetIterator {
 			}
 			updateOrder.sort(Comparator.comparingDouble(PairWiseState::globalDensity).reversed());
 			for (PairWiseState pws : updateOrder) {
-				selection[pws.getColumn()] = pws.selectGiven(selection).get(0);
+				selection.args[pws.getColumn()] = pws.selectGiven(selection.args).get(0);
 			}
 		}
 
 		for (SinglePairState sps : cellStates) {
-			sps.select(selection[sps.colOne], selection[sps.colTwo]);
+			sps.select(selection.args[sps.colOne], selection.args[sps.colTwo]);
 		}
 
-		return fillIn(selection);
+		return selection;
 	}
 
-	private void constrainedSelect(List<PairWiseState> updateOrder, int[] selection) {
+	private void constrainedSelect(List<PairWiseState> updateOrder, ArgVector selection) {
 
 		final int size = updateOrder.size();
 		for (int i = 0; i < size; i++) {
 			final int col = i;
 			PairWiseState pws = updateOrder.get(col);
 
-			final List<Integer> sortedOptions = pws.selectGiven(selection);
+			final List<Integer> sortedOptions = pws.selectGiven(selection.args);
 
 			final Predicate<Object[]> constraint = args.getConstraint(col);
 			if (constraint != null) {
 
-				final Predicate<Integer> wrappedConstraint = objs -> !constraint.test(fillIn(selection, objs, col));
+				final Predicate<Integer> wrappedConstraint = selVal -> !constraint.test(selection.withValue(selVal, col).getArgVals());
 				sortedOptions.removeIf(wrappedConstraint);
 			}
 
 			if (!sortedOptions.isEmpty()) {
-				selection[pws.getColumn()] = sortedOptions.get(0);
+				selection.args[pws.getColumn()] = sortedOptions.get(0);
 			}
 			else {
 				// TODO
@@ -111,23 +109,6 @@ public class PairwiseIterator extends ArgSetIterator {
 
 	}
 
-	private Object[] fillIn(int[] selection, int extraValue, int col) {
-
-		int[] extraSelection = selection.clone();
-
-		extraSelection[col] = extraValue;
-		return fillIn(extraSelection);
-	}
-
-	private Object[] fillIn(int[] selection) {
-
-		Object[] ret = new Object[selection.length];
-
-		for (int i = 0; i < selection.length; i++) {
-			ret[i] = args.argsValues.get(i).get(selection[i]);
-		}
-		return ret;
-	}
 
 	private boolean isCoverageComplete() {
 

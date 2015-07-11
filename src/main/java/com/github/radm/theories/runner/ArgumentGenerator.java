@@ -11,6 +11,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.radm.theories.pairwise.ArgVector;
 import com.github.radm.theories.pairwise.ArgumentSet;
 
 /**
@@ -75,8 +76,9 @@ public class ArgumentGenerator {
 		ArgumentSet as = new ArgumentSet(colNames, allArgValues);
 		constraints.applyConstraintsTo(testMethod, as);
 
-		for (Object[] rawArgs : as) {
+		for (ArgVector argVector : as) {
 
+			Object[] rawArgs = argVector.getArgVals();
 			assert rawArgs.length == testMethod.getMethod().getParameterCount();
 			MethodWithArguments testCall = new MethodWithArguments(
 					testMethod.getMethod(), rawArgs);

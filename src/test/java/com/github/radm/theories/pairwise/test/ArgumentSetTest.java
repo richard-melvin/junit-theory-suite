@@ -1,12 +1,20 @@
 package com.github.radm.theories.pairwise.test;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.time.DayOfWeek;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import org.junit.contrib.theories.DataPoint;
 import org.junit.contrib.theories.Theories;
+import org.junit.contrib.theories.Theory;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.github.radm.theories.pairwise.ArgVector;
 import com.github.radm.theories.pairwise.ArgumentSet;
 
 /**
@@ -14,6 +22,8 @@ import com.github.radm.theories.pairwise.ArgumentSet;
  */
 @RunWith(Theories.class)
 public abstract class ArgumentSetTest {
+
+	private static final Logger LOG = LoggerFactory.getLogger(ArgumentSetTest.class);
 
 	public static @DataPoint ArgumentSet oneBoolean = new ArgumentSet(Arrays.asList("a"),
 			Arrays.asList(Arrays.asList(true, false)));
@@ -59,6 +69,42 @@ public abstract class ArgumentSetTest {
 
 	private static boolean isWeekDay(DayOfWeek dayOfWeek) {
 		return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
+	}
+
+	@Theory
+	public void canIterateWithoutGettingNull(ArgumentSet as) {
+		for (ArgVector args : as) {
+			assertNotNull(args);
+			for (Object o : args.getArgVals()) {
+				assertNotNull(o);
+			}
+		}
+	}
+
+	@Theory
+	public void canCallHasNextFreely(ArgumentSet as) {
+
+		Iterator<?> iter = as.iterator();
+
+		while (iter.hasNext()) {
+			assertTrue(iter.hasNext());
+			iter.next();
+		}
+		assertTrue(!iter.hasNext());
+
+	}
+
+
+	protected int countByIterator(ArgumentSet as, Iterator<ArgVector> iter) {
+		int count = 0;
+		while (iter.hasNext()) {
+			count++;
+			ArgVector next = iter.next();
+
+			LOG.debug("got {}", next);
+		}
+		LOG.info("length of {} is {}", as.getArgNames(), count);
+		return count;
 	}
 
 

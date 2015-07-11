@@ -1,20 +1,16 @@
 package com.github.radm.theories.pairwise.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
 import java.util.Iterator;
 
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.contrib.theories.Theories;
-import org.junit.contrib.theories.Theory;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import com.github.radm.theories.pairwise.ArgVector;
 import com.github.radm.theories.pairwise.ArgumentSet;
 
 /**
@@ -22,8 +18,6 @@ import com.github.radm.theories.pairwise.ArgumentSet;
  */
 @RunWith(Theories.class)
 public class PairwiseIteratorTest extends ArgumentSetTest {
-
-	private static final Logger LOG = LoggerFactory.getLogger(PairwiseIteratorTest.class);
 
 	@Test
 	public void expectedLength1() {
@@ -63,41 +57,11 @@ public class PairwiseIteratorTest extends ArgumentSetTest {
 	}
 
 
-	@Theory
-	public void canIterateWithoutGettingNull(ArgumentSet as) {
-		for (Object[] args : as) {
-			assertNotNull(args);
-			for (Object o : args) {
-				assertNotNull(o);
-			}
-		}
-	}
-
-	@Theory
-	public void canCallHasNextFreely(ArgumentSet as) {
-
-		Iterator<?> iter = as.iterator();
-
-		while (iter.hasNext()) {
-			assertTrue(iter.hasNext());
-			iter.next();
-		}
-		assertTrue(!iter.hasNext());
-
-	}
 
 	private int countArguments(ArgumentSet as) {
-		Iterator<?> iter = as.pairwiseIterator();
+		Iterator<ArgVector> iter = as.pairwiseIterator();
 
-		int count = 0;
-		while (iter.hasNext()) {
-			count++;
-			Object[] next = (Object[]) iter.next();
-
-			LOG.debug("got {}", Arrays.toString(next));
-		}
-		LOG.info("length of {} is {}", as.getArgNames(), count);
-		return count;
+		return countByIterator(as, iter);
 	}
 
 }

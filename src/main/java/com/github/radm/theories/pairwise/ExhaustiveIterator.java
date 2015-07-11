@@ -1,6 +1,5 @@
 package com.github.radm.theories.pairwise;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.function.Predicate;
 
@@ -14,7 +13,9 @@ public class ExhaustiveIterator extends ArgSetIterator {
 	private final ExhaustiveIterator nextColumn;
 	private final ExhaustiveIterator prevColumn;
 
-	Object currValue;
+	private Object currValue;
+	private int currIndex = -1;
+
 	private final int argIndex;
 	private final Predicate<Object[]> predicate;
 
@@ -53,7 +54,7 @@ public class ExhaustiveIterator extends ArgSetIterator {
 
 
 	@Override
-	protected Object[] computeNext() {
+	protected ArgVector computeNext() {
 		if (predicate == null)
 		{
 			return computeNextSimple();
@@ -62,16 +63,17 @@ public class ExhaustiveIterator extends ArgSetIterator {
 	}
 
 
-	protected Object[] computeNextPassingPredicate() {
-		Object[] candidate = computeNextSimple();
+	protected ArgVector computeNextPassingPredicate() {
+		ArgVector candidate = computeNextSimple();
 		boolean requiresReset = false;
-		while (!predicate.test(populateResult()) && !knownComplete) {
+		while (!predicate.test(populateResult().getArgVals()) && !knownComplete) {
 			if (ArgumentSet.LOG.isTraceEnabled()) {
-				ArgumentSet.LOG.trace("Rejected {} by predicate on {}", Arrays.toString(populateResult()),
+				ArgumentSet.LOG.trace("Rejected {} by predicate on {}", populateResult(),
 						args.argNames.get(argIndex));
 			}
 			if (valIter.hasNext()) {
 				currValue = valIter.next();
+				currIndex++;
 			} else {
 				knownComplete = true;
 			}
@@ -94,11 +96,12 @@ public class ExhaustiveIterator extends ArgSetIterator {
 	 *
 	 * @return next object, or null.
 	 */
-	protected Object[] computeNextSimple() {
+	protected ArgVector computeNextSimple() {
 
 		if (nextColumn == null) {
 			if (valIter.hasNext()) {
 				currValue = valIter.next();
+				currIndex++;
 				return populateResult();
 			}
 			knownComplete = true;
@@ -107,6 +110,7 @@ public class ExhaustiveIterator extends ArgSetIterator {
 
 		if (currValue == null && valIter.hasNext()) {
 			currValue = valIter.next();
+			currIndex++;
 		}
 
 		if (nextColumn.hasNext()) {
@@ -116,6 +120,7 @@ public class ExhaustiveIterator extends ArgSetIterator {
 		while (valIter.hasNext()) {
 			nextColumn.reset();
 			currValue = valIter.next();
+			currIndex++;
 			if (nextColumn.hasNext()) {
 				return nextColumn.next();
 			}
@@ -126,12 +131,12 @@ public class ExhaustiveIterator extends ArgSetIterator {
 
 	}
 
-	private Object[] populateResult() {
-		Object[] ret = new Object[argIndex + 1];
+	private ArgVector populateResult() {
+		ArgVector ret = new ArgVector(args);
 
 		ExhaustiveIterator it = this;
-		for (int i = ret.length - 1; i >= 0; i--) {
-			ret[i] = it.currValue;
+		for (int i = argIndex; i >= 0; i--) {
+			ret.args[i] = it.currIndex;
 			it = it.prevColumn;
 		}
 
@@ -142,6 +147,7 @@ public class ExhaustiveIterator extends ArgSetIterator {
 		valIter = makeIter();
 		knownComplete = false;
 		currValue = null;
+		currIndex = -1;
 		nextValue = null;
 		if (nextColumn != null) {
 			nextColumn.reset();
