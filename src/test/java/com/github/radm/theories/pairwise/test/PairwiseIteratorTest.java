@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.contrib.theories.Theories;
 import org.junit.runner.RunWith;
@@ -40,20 +39,18 @@ public class PairwiseIteratorTest extends ArgumentSetTest {
 	}
 
 	@Test
-	@Ignore
 	public void expectedLength5() {
-		assertTrue(4 == countArguments(threeIntsConstrained));
+		assertEquals(5, countArguments(threeIntsConstrained));
 	}
 
 	@Test
 	public void expectedLength6() {
-		assertTrue(63 >= countArguments(fourDays));
+		assertEquals(63, countArguments(fourDays));
 	}
 
 	@Test
-	@Ignore
 	public void expectedLength7() {
-		assertTrue(64 >= countArguments(fourWeekDays));
+		assertEquals(36, countArguments(fourWeekDays));
 	}
 
 

@@ -49,41 +49,56 @@ public class PairwiseIterator extends ArgSetIterator {
 		}
 
 		hasConstraint = IntStream.range(0, tableSize).anyMatch(i -> args.getConstraint(i) != null);
+
+		if (hasConstraint) {
+			setupConstrainedCoverageTargets();
+		}
 	}
 
 	@Override
 	protected ArgVector computeNext() {
 
+		if (isCoverageComplete()) {
+			knownComplete = true;
+			return null;
+		}
+
 		ArgVector selection = new ArgVector(args);
 
 		List<PairWiseState> updateOrder = new ArrayList<>(columnStates);
 		if (hasConstraint) {
-
 			constrainedSelect(updateOrder, selection);
 			if (knownComplete) {
 				return null;
 			}
 		} else {
-			if (isCoverageComplete()) {
-				knownComplete = true;
-				return null;
-			}
 			updateOrder.sort(Comparator.comparingDouble(PairWiseState::globalDensity).reversed());
 			for (PairWiseState pws : updateOrder) {
 				selection.args[pws.getColumn()] = pws.selectGiven(selection.args).get(0);
 			}
 		}
 
-		for (SinglePairState sps : cellStates) {
-			sps.select(selection.args[sps.colOne], selection.args[sps.colTwo]);
-		}
+		// we have a valid useful selection, so updates coverage state and return it.
+		markAsCovered(selection);
 
 		return selection;
 	}
 
+	private void markAsCovered(ArgVector selection) {
+		for (SinglePairState sps : cellStates) {
+			sps.select(selection.args[sps.colOne], selection.args[sps.colTwo]);
+		}
+	}
+
+	/**
+	 * o an exhaustive search from starting point until we find something passing constraints.
+	 * @param updateOrder order in which to check columns
+	 * @param selection empty selection
+	 */
 	private void constrainedSelect(List<PairWiseState> updateOrder, ArgVector selection) {
 
 		final int size = updateOrder.size();
+		int[] skipCounts = new int[size];
 		for (int i = 0; i < size; i++) {
 			final int col = i;
 			PairWiseState pws = updateOrder.get(col);
@@ -97,16 +112,33 @@ public class PairwiseIterator extends ArgSetIterator {
 				sortedOptions.removeIf(wrappedConstraint);
 			}
 
-			if (!sortedOptions.isEmpty()) {
-				selection.args[pws.getColumn()] = sortedOptions.get(0);
+			if (sortedOptions.size() > skipCounts[i]) {
+				selection.args[pws.getColumn()] = sortedOptions.get(skipCounts[i]);
 			}
 			else {
-				// TODO
-				knownComplete = true;
+				skipCounts[i] = 0;
+				i--;
+				if (i < 0) {
+					knownComplete = true;
+				}
+				else {
+					skipCounts[i]++;
+				}
 			}
 		}
+	}
 
 
+	/**
+	 * if constraints exist, we have to do an exhaustive iteration to
+	 * get the target pairwise coverage statistics
+	 */
+	private void setupConstrainedCoverageTargets() {
+		for (ArgVector av : args) {
+			markAsCovered(av);
+		}
+
+		cellStates.forEach(cs -> cs.setAsHighWatermark());
 	}
 
 

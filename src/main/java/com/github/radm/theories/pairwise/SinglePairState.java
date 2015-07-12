@@ -108,4 +108,22 @@ public class SinglePairState {
 	public boolean isComplete() {
 		return numSelected >= numOptions[colOne] * numOptions[colTwo];
 	}
+
+	/**
+	 * Flag everything not currently present as unreachable.
+	 *
+	 */
+	public void setAsHighWatermark() {
+
+		numSelected = (numOptions[colOne] * numOptions[colTwo]) - numSelected ;
+		for (int i = 0; i < selectionCountOne.length; i++) {
+			selectionCountOne[i] = numOptions[colTwo] - selectionCountOne[i];
+		}
+		for (int i = 0; i < selectionCountTwo.length; i++) {
+			selectionCountTwo[i] = numOptions[colOne] - selectionCountTwo[i];
+		}
+
+		selectedPairs.flip(0, selectedPairs.size());
+
+	}
 }
