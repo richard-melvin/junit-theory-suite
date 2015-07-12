@@ -5,7 +5,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.time.DayOfWeek;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.junit.contrib.theories.DataPoint;
 import org.junit.contrib.theories.Theories;
@@ -60,8 +62,21 @@ public abstract class ArgumentSetTest {
 	public static @DataPoint ArgumentSet twoBooleansConstrained = makeTwoBooleans()
 			.withConstraint("a", args -> (Boolean) args[0]);
 
+	public static @DataPoint ArgumentSet alwaysFailingConstraint = makeTwoBooleans()
+			.withConstraint("a", args -> false);
+
+
 	public static @DataPoint ArgumentSet threeIntsConstrained = makeThreeIntegers().withConstraint("c",
 			args -> isOdd((Integer) args[0]) && isOdd((Integer) args[1]) && isOdd((Integer) args[2]));
+
+	public static @DataPoint ArgumentSet threeIntsTightlyConstrained = makeThreeIntegers().withConstraint("c",
+			args -> 2 == ((Integer) args[0]) && 3 == ((Integer) args[1]) && 1 == ((Integer) args[2]));
+
+	public static @DataPoint ArgumentSet threeIntsConstrainedBySum = makeThreeIntegers()
+			.withConstraint("b", args -> 3 <= ((Integer) args[0] + (Integer) args[1]))
+			.withConstraint("c", args -> 2 >= ((Integer) args[0] + (Integer) args[2])
+					);
+
 
 	private static boolean isOdd(int i) {
 		return i % 2 != 0;
@@ -96,12 +111,17 @@ public abstract class ArgumentSetTest {
 
 
 	protected int countByIterator(ArgumentSet as, Iterator<ArgVector> iter) {
+
+		Set<String> seen = new HashSet<>();
 		int count = 0;
 		while (iter.hasNext()) {
 			count++;
 			ArgVector next = iter.next();
+			String nextStr = next.toString();
+			assertTrue(!seen.contains(nextStr));
 
-			LOG.debug("got {}", next);
+			LOG.debug("got {}", nextStr);
+			seen.add(nextStr);
 		}
 		LOG.info("length of {} is {}", as.getArgNames(), count);
 		return count;

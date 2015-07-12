@@ -19,40 +19,57 @@ import com.github.radm.theories.pairwise.ArgumentSet;
 public class PairwiseIteratorTest extends ArgumentSetTest {
 
 	@Test
-	public void expectedLength1() {
+	public void expectedLengthForOneBoolean() {
 		assertEquals(2, countArguments(oneBoolean));
 	}
 
 	@Test
-	public void expectedLength2() {
+	public void expectedLengthForTwoBooleans() {
 		assertEquals(4, countArguments(twoBooleans));
 	}
 
 	@Test
-	public void expectedLength3() {
+	public void expectedLengthForThreeIntegers() {
 		assertTrue(9 == countArguments(threeIntegers));
 	}
 
 	@Test
-	public void expectedLength4() {
+	public void expectedLengthForTwoBooleansConstrained() {
 		assertEquals(2, countArguments(twoBooleansConstrained));
 	}
 
 	@Test
-	public void expectedLength5() {
+	public void expectedLengthForThreeIntsConstrained() {
 		assertEquals(5, countArguments(threeIntsConstrained));
 	}
 
 	@Test
-	public void expectedLength6() {
+	public void expectedLengthForFourDays() {
 		assertEquals(63, countArguments(fourDays));
 	}
 
 	@Test
-	public void expectedLength7() {
+	public void expectedLengthForFourWeekDays() {
 		assertEquals(36, countArguments(fourWeekDays));
 	}
 
+
+	@Test
+	public void expectedLengthForAlwaysFailingConstraint() {
+		assertEquals(0, countArguments(alwaysFailingConstraint));
+	}
+
+
+	@Test
+	public void expectedLengthForTightConstraint() {
+		assertEquals(1, countArguments(threeIntsTightlyConstrained));
+	}
+
+
+	@Test
+	public void expectedLengthForThreeIntsConstrainedBySum() {
+		assertEquals(2, countArguments(threeIntsConstrainedBySum));
+	}
 
 
 	private int countArguments(ArgumentSet as) {
