@@ -2,6 +2,7 @@ package com.github.radm.theories.runner;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,6 +12,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.radm.theories.Pairwise;
 import com.github.radm.theories.pairwise.ArgVector;
 import com.github.radm.theories.pairwise.ArgumentSet;
 
@@ -76,8 +78,16 @@ public class ArgumentGenerator {
 		ArgumentSet as = new ArgumentSet(colNames, allArgValues);
 		constraints.applyConstraintsTo(testMethod, as);
 
-		for (ArgVector argVector : as) {
+		final Iterator<ArgVector> iter;
+		if (testMethod.getMethod().isAnnotationPresent(Pairwise.class)) {
+			iter = as.pairwiseIterator();
+		}
+		else {
+			iter = as.iterator();
+		}
 
+		while (iter.hasNext()) {
+			ArgVector argVector = iter.next();
 			Object[] rawArgs = argVector.getArgVals();
 			assert rawArgs.length == testMethod.getMethod().getParameterCount();
 			MethodWithArguments testCall = new MethodWithArguments(

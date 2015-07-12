@@ -78,7 +78,8 @@ public class PairwiseIterator extends ArgSetIterator {
 			}
 		}
 
-		// we have a valid useful selection, so updates coverage state and return it.
+		// we have a valid useful selection, so updates coverage state and
+		// return it.
 		markAsCovered(selection);
 
 		return selection;
@@ -91,16 +92,20 @@ public class PairwiseIterator extends ArgSetIterator {
 	}
 
 	/**
-	 * o an exhaustive search from starting point until we find something passing constraints.
-	 * @param updateOrder order in which to check columns
-	 * @param selection empty selection
+	 * Do an exhaustive search from starting point until we find something
+	 * passing constraints.
+	 *
+	 * @param updateOrder
+	 *            order in which to check columns
+	 * @param selection
+	 *            empty selection
 	 */
 	private void constrainedSelect(List<PairWiseState> updateOrder, ArgVector selection) {
 
 		final int size = updateOrder.size();
 		int[] skipCounts = new int[size];
-		for (int i = 0; i < size; i++) {
-			final int col = i;
+		int col = 0;
+		while (col < size) {
 			PairWiseState pws = updateOrder.get(col);
 
 			final List<Integer> sortedOptions = pws.selectGiven(selection.args);
@@ -108,30 +113,38 @@ public class PairwiseIterator extends ArgSetIterator {
 			final Predicate<Object[]> constraint = args.getConstraint(col);
 			if (constraint != null) {
 
-				final Predicate<Integer> wrappedConstraint = selVal -> !constraint.test(selection.withValue(selVal, col).getArgVals());
+				final Predicate<Integer> wrappedConstraint = selVal -> !constraint
+						.test(selection.withValue(selVal, pws.getColumn()).getArgVals());
 				sortedOptions.removeIf(wrappedConstraint);
 			}
 
-			if (sortedOptions.size() > skipCounts[i]) {
-				selection.args[pws.getColumn()] = sortedOptions.get(skipCounts[i]);
+			// ensure dealing with constraints hasn't made the selection dead coverage-wise
+			if (col == size - 1) {
+				sortedOptions.removeIf(selVal -> alreadyCovered(selection.withValue(selVal, pws.getColumn())));
 			}
-			else {
-				skipCounts[i] = 0;
-				i--;
-				if (i < 0) {
+
+			if (sortedOptions.size() > skipCounts[col]) {
+				selection.args[pws.getColumn()] = sortedOptions.get(skipCounts[col]);
+				col++;
+			} else {
+				skipCounts[col] = 0;
+				col--;
+				if (col < 0) {
 					knownComplete = true;
-				}
-				else {
-					skipCounts[i]++;
+				} else {
+					skipCounts[col]++;
 				}
 			}
 		}
 	}
 
+	private boolean alreadyCovered(ArgVector av) {
+		return cellStates.stream().allMatch(cs -> cs.isSelected(av.args[cs.colOne], av.args[cs.colTwo]));
+	}
 
 	/**
-	 * if constraints exist, we have to do an exhaustive iteration to
-	 * get the target pairwise coverage statistics
+	 * if constraints exist, we have to do an exhaustive iteration to get the
+	 * target pairwise coverage statistics
 	 */
 	private void setupConstrainedCoverageTargets() {
 		for (ArgVector av : args) {
@@ -140,7 +153,6 @@ public class PairwiseIterator extends ArgSetIterator {
 
 		cellStates.forEach(cs -> cs.setAsHighWatermark());
 	}
-
 
 	private boolean isCoverageComplete() {
 

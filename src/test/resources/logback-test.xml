@@ -8,7 +8,8 @@
 		</encoder>
 	</appender>
 
-	<logger name="com.github.radm.theories" level="INFO" />
+    <logger name="com.github.radm.theories.runner" level="INFO" />
+    <logger name="com.github.radm.theories.pairwise" level="INFO" />
 	<logger name="com.github.radm.theories.test" level="INFO" />
 	<root level="info">
 		<appender-ref ref="STDOUT" />
