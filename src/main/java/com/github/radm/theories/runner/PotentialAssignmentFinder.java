@@ -14,6 +14,8 @@ import org.junit.contrib.theories.internal.AllMembersSupplier;
 import org.junit.contrib.theories.internal.BooleanSupplier;
 import org.junit.contrib.theories.internal.EnumSupplier;
 import org.junit.runners.model.TestClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Work out the set of potential assignments for each argument on an individual basis.
@@ -24,6 +26,7 @@ public class PotentialAssignmentFinder {
 
 	private final TestClass testClass;
 
+  private static final Logger LOG = LoggerFactory.getLogger(PotentialAssignmentFinder.class);
 
 	public PotentialAssignmentFinder(TestClass testClass) {
 		super();
@@ -35,8 +38,12 @@ public class PotentialAssignmentFinder {
 		List<PotentialAssignment> assignments = getSupplier(unassigned)
 				.getValueSources(unassigned);
 
-		if (assignments.size() == 0) {
+		if (assignments.isEmpty()) {
 			assignments = generateAssignmentsFromTypeAlone(unassigned);
+		}
+
+		if (assignments.isEmpty()) {
+		  LOG.warn("Unable to find any possible values for argument {}", unassigned.getName());
 		}
 
 		return assignments;

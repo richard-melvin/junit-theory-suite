@@ -58,6 +58,7 @@ public class ArgumentGenerator {
 	 */
 	public Collection<MethodWithArguments> computeTestMethodsWithArgs() throws Throwable {
 
+	  LOG.debug("computing cases for {}", testMethod.getName());
 		List<ParameterSignature> signatures = ParameterSignature.signatures(testMethod.getMethod());
 		List<String> colNames = new ArrayList<>(
 				signatures.stream().map(ParameterSignature::getName).collect(Collectors.toList()));
