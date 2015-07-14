@@ -39,7 +39,7 @@ public class MethodWithArguments extends FrameworkMethod {
 		StringJoiner sj = new StringJoiner(",", super.getName() + "[", "]");
 
 		for (int i = 0; i < args.length; i++) {
-			sj.add(args[i].toString());
+			sj.add(Objects.toString(args[i]));
 		}
 
 		return sj.toString();
