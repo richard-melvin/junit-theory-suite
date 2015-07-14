@@ -5,8 +5,11 @@
 
 
 junit-theory-suite is a simple library that replaces the default [JUnit](https://github.com/junit-team/junit)
-[theories](https://github.com/junit-team/junit/wiki/Theories) runner with
-one that treats each individual combination of parameters as a distinct test case.
+[theories](https://github.com/junit-team/junit/wiki/Theories) runner. The key improvements are: 
+
+- treats each individual combination of parameters as a distinct test case.
+- optionally select [All-Pairs](https://en.wikipedia.org/wiki/All-pairs_testing) test case selection instead of the default exhaustive
+- specify constraints between argument values that discard test cases that don't match the constraint
 
 ```java
 import com.github.radm.theories.TheorySuite;
@@ -62,7 +65,7 @@ To use it, simply:
 	<dependency>
 	    <groupId>com.github.richard-melvin</groupId>
 	    <artifactId>junit-theory-suite</artifactId>
-	    <version>v0.5.0</version>
+	    <version>0.7.0</version>
 	    <scope>test</scope>
 	</dependency>
 
