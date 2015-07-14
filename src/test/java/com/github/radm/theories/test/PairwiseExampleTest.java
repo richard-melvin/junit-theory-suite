@@ -14,6 +14,7 @@ import com.github.radm.theories.TheorySuite;
  */
 @RunWith(TheorySuite.class)
 @Pairwise
+@SuppressWarnings("unused")
 public class PairwiseExampleTest {
 
 	enum ChoiceType {

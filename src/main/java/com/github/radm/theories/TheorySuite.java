@@ -157,17 +157,17 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 	}
 
 	@Override
-	public void filter(Filter filter) throws NoTestsRemainException {
-		super.filter(filter);
+	public void filter(Filter newFilter) throws NoTestsRemainException {
+		super.filter(newFilter);
 
-		this.filter = filter;
+		this.filter = newFilter;
 	}
 
 	@Override
-	public void sort(Sorter sorter) {
-		super.sort(sorter);
+	public void sort(Sorter newSorter) {
+		super.sort(newSorter);
 
-		this.sorter = sorter;
+		this.sorter = newSorter;
 	}
 
 	private void computeTestMethodsWithArgs(TheoriesWrapper runner) {
@@ -279,7 +279,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 				if (methodCases.isEmpty()) {
 					reportError(new Error("No test cases found for " + fm + "; missing annotations?"));
 				} else {
-					recordCases(fm, methodDescription, methodCases);
+					recordCases(methodDescription, methodCases);
 
 					checksByMethod.put(fm.getMethod(), new AssumptionsFailureCounter(methodCases.size()));
 					LOG.debug("theory {} has {} cases", fm, methodCases.size());
@@ -294,7 +294,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		}
 	}
 
-	private void recordCases(FrameworkMethod fm, Description methodDescription,
+	private void recordCases(Description methodDescription,
 			Collection<MethodWithArguments> methodCases) {
 		allMethodsWithAllArgs.addAll(methodCases);
 

@@ -75,6 +75,8 @@ public class ConstraintTest extends CustomRunnerTest {
 
 	}
 
+	 @SuppressWarnings("unused")
+
 	public static class ExcessArguments extends SimpleConstraints {
 
 		@Theory
@@ -132,6 +134,7 @@ public class ConstraintTest extends CustomRunnerTest {
 
 	}
 
+  @SuppressWarnings("unused")
 	public static class TwoPairsWithExtraArguments extends SimpleConstraints {
 
 		@Theory

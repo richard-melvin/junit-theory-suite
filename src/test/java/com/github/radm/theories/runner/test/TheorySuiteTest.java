@@ -348,11 +348,12 @@ public class TheorySuiteTest extends CustomRunnerTest {
 
 
 
+	@SuppressWarnings("unused")
 	public static class LargeNumberOfArgs {
 
 		@DataPoints public static int[] l1 = IntStream.range(0, 5).toArray();
 
-		@Theory
+    @Theory
 		public void sixArgsTheory(int i, boolean a, boolean b, boolean c, boolean d, int j) {
 		}
 	}
@@ -368,7 +369,7 @@ public class TheorySuiteTest extends CustomRunnerTest {
 
 
 
-
+  @SuppressWarnings("unused")
 	public static class StringArgs {
 
 		@DataPoints public static String[] l1 = {"hello", "(/)"};

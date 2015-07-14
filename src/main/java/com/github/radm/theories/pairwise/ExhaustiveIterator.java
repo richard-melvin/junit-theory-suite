@@ -47,9 +47,8 @@ public class ExhaustiveIterator extends ArgSetIterator {
 	private ExhaustiveIterator makeNextColumn() {
 		if (argIndex < args.argNames.size() - 1) {
 			return new ExhaustiveIterator(args, this);
-		} else {
-			return null;
 		}
+    return null;
 	}
 
 
