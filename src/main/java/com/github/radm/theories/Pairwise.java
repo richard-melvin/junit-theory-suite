@@ -15,7 +15,7 @@ import static java.lang.annotation.RetentionPolicy.*;
  *
  */
 @Retention(RUNTIME)
-@Target(METHOD)
+@Target({METHOD, TYPE})
 public @interface Pairwise {
 
 }

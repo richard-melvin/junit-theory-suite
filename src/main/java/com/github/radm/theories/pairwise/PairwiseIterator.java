@@ -129,6 +129,7 @@ public class PairwiseIterator extends ArgSetIterator {
 			} else {
 				skipCounts[col] = 0;
 				col--;
+				selection.args[col] = -1;
 				if (col < 0) {
 					knownComplete = true;
 				} else {
@@ -156,7 +157,7 @@ public class PairwiseIterator extends ArgSetIterator {
 
 	private boolean isCoverageComplete() {
 
-		return columnStates.stream().allMatch(PairWiseState::isComplete);
+		return cellStates.stream().allMatch(SinglePairState::isComplete);
 
 	}
 

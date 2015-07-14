@@ -19,6 +19,13 @@ public class PairWiseState {
 	final int numColumnOptions;
 	private final List<SinglePairState> states;
 
+	/**
+	 * Instantiates a new pair wise state.
+	 *
+	 * @param argCounts the arg counts
+	 * @param columnNumber the column number
+	 * @param states the states
+	 */
 	public PairWiseState(int[] argCounts, int columnNumber, List<SinglePairState> states) {
 		this.column = columnNumber;
 
@@ -27,15 +34,11 @@ public class PairWiseState {
 	}
 
 	/**
-	 * Checks if all required values have been selected.
+	 * Select options in weight order given a partial selection.
 	 *
-	 * @return true, if is complete
+	 * @param partialSelection the partial selection
+	 * @return the list
 	 */
-	public boolean isComplete() {
-
-		return states.stream().allMatch(sps -> sps.isComplete());
-	}
-
 	public List<Integer> selectGiven(int[] partialSelection) {
 
 		LOG.trace("select colummn {} given {}", column, partialSelection);
@@ -73,6 +76,8 @@ public class PairWiseState {
 	private double calculateDensity(int[] partialSelection, int selection) {
 		double density = 0;
 
+		assert partialSelection[column] < 0;
+
 		for (SinglePairState state : states) {
 
 			final int otherColumn = state.otherColumn(column);
@@ -89,7 +94,8 @@ public class PairWiseState {
 				}
 
 				if (!state.isSelected(xSelection, ySelection)) {
-					LOG.trace("{}={}, {}={} is new", column, selection, otherColumn,
+					LOG.trace("{}={}, {}={} would be new if selected",
+							column, selection, otherColumn,
 							partialSelection[otherColumn]);
 					density += state.densityOf(column, selection);
 				}

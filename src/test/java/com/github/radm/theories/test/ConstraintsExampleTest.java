@@ -17,6 +17,7 @@ import org.junit.contrib.theories.Theory;
 import org.junit.runner.RunWith;
 
 import com.github.radm.theories.Constraint;
+import com.github.radm.theories.Pairwise;
 import com.github.radm.theories.TheorySuite;
 import com.github.radm.theories.WithConstraints;
 
@@ -26,6 +27,7 @@ import com.github.radm.theories.WithConstraints;
  * {@link com.github.radm.theories.Constraint} annotation.
  */
 @RunWith(TheorySuite.class)
+@Pairwise
 public class ConstraintsExampleTest {
 
 	@DataPoints("century")

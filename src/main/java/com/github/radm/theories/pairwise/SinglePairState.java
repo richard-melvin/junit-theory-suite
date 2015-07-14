@@ -96,12 +96,12 @@ public class SinglePairState {
 	}
 
 	private double densityOne(int colOneValue) {
-		final double target = (double) numOptions[colOne];
+		final double target = (double) numOptions[colTwo];
 		return (1.0 - selectionCountOne[colOneValue] / target);
 	}
 
 	private double densityTwo(int colTwoValue) {
-		final double target = (double) numOptions[colTwo];
+		final double target = (double) numOptions[colOne];
 		return (1.0 - selectionCountTwo[colTwoValue] / target);
 	}
 

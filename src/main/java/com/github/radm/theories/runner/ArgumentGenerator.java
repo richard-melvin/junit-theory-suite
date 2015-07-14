@@ -21,8 +21,7 @@ import com.github.radm.theories.pairwise.ArgumentSet;
  */
 public class ArgumentGenerator {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(ArgumentGenerator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ArgumentGenerator.class);
 
 	private final PotentialAssignmentFinder finder;
 
@@ -40,8 +39,7 @@ public class ArgumentGenerator {
 	 * @param testMethod
 	 *            the test method
 	 */
-	public ArgumentGenerator(PotentialAssignmentFinder finder,
-			ConstraintFinder constraints,
+	public ArgumentGenerator(PotentialAssignmentFinder finder, ConstraintFinder constraints,
 			FrameworkMethod testMethod) {
 		super();
 		this.finder = finder;
@@ -55,14 +53,14 @@ public class ArgumentGenerator {
 	 * @param fm
 	 *            the framework method
 	 * @return the collection
-	 * @throws Throwable if something goes wrong with test code calculating arguments
+	 * @throws Throwable
+	 *             if something goes wrong with test code calculating arguments
 	 */
 	public Collection<MethodWithArguments> computeTestMethodsWithArgs() throws Throwable {
 
-		List<ParameterSignature> signatures = ParameterSignature
-				.signatures(testMethod.getMethod());
-		List<String> colNames = new ArrayList<>(signatures.stream()
-				.map(ParameterSignature::getName).collect(Collectors.toList()));
+		List<ParameterSignature> signatures = ParameterSignature.signatures(testMethod.getMethod());
+		List<String> colNames = new ArrayList<>(
+				signatures.stream().map(ParameterSignature::getName).collect(Collectors.toList()));
 
 		List<List<Object>> allArgValues = new ArrayList<>(signatures.size());
 		for (ParameterSignature sig : signatures) {
@@ -79,10 +77,9 @@ public class ArgumentGenerator {
 		constraints.applyConstraintsTo(testMethod, as);
 
 		final Iterator<ArgVector> iter;
-		if (testMethod.getMethod().isAnnotationPresent(Pairwise.class)) {
+		if (isPairWise()) {
 			iter = as.pairwiseIterator();
-		}
-		else {
+		} else {
 			iter = as.iterator();
 		}
 
@@ -90,8 +87,7 @@ public class ArgumentGenerator {
 			ArgVector argVector = iter.next();
 			Object[] rawArgs = argVector.getArgVals();
 			assert rawArgs.length == testMethod.getMethod().getParameterCount();
-			MethodWithArguments testCall = new MethodWithArguments(
-					testMethod.getMethod(), rawArgs);
+			MethodWithArguments testCall = new MethodWithArguments(testMethod.getMethod(), rawArgs);
 
 			LOG.trace("Identified test case {}", testCall);
 
@@ -99,6 +95,11 @@ public class ArgumentGenerator {
 		}
 
 		return testsCalls;
+	}
+
+	private boolean isPairWise() {
+		return testMethod.getMethod().isAnnotationPresent(Pairwise.class)
+				|| testMethod.getDeclaringClass().isAnnotationPresent(Pairwise.class);
 	}
 
 }
