@@ -21,12 +21,20 @@ import com.github.radm.theories.WithConstraints;
  * <a href="http://stackoverflow.com/questions/837484/junit-theory-for-hashcode-equals-contract">here</a>
  */
 @RunWith(TheorySuite.class)
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "javadoc"})
 public class EqualsHashCodeTest
 {
 
   // a class that nothing will ever be of
   private class Dummy {
+
+    /**
+     *
+     */
+    public Dummy()
+    {
+      // TODO Auto-generated constructor stub
+    }
 
   }
 

@@ -1,3 +1,14 @@
+/*******************************************************************************
+ *     Copyright (c) 2015 European Space Agency
+ *     All Rights Reserved
+ *
+ *     Project:   SOIS Electronic Data Sheets
+ *
+ *     Module:    SEDS Tooling
+ *
+ *     Author:    SciSys UK Ltd.
+ *
+ *******************************************************************************/
 package com.github.radm.theories.pairwise;
 
 import java.util.Arrays;
@@ -8,77 +19,84 @@ import java.util.Arrays;
  */
 public class ArgVector {
 
-	private final ArgumentSet argSet;
-	public final int[] args;
-	private Object[] argVals;
+  private final ArgumentSet argSet;
 
-	public ArgVector(ArgumentSet argSet) {
-		super();
-		this.argSet = argSet;
-		args = new int[argSet.argNames.size()];
-		Arrays.setAll(args, i -> -1);
+  /** The args. */
+  public final int[] args;
+  private Object[] argVals;
 
-	}
+  /**
+   * Instantiates a new arg vector.
+   *
+   * @param argSet the arg set
+   */
+  public ArgVector(ArgumentSet argSet) {
+    super();
+    this.argSet = argSet;
+    args = new int[argSet.argNames.size()];
+    Arrays.setAll(args, i -> -1);
 
-	private ArgVector(ArgumentSet argSet, int[] args) {
-		super();
-		this.argSet = argSet;
-		this.args = args.clone();
-	}
+  }
 
-	/**
-	 * number of arguments.
-	 *
-	 * @return the size
-	 */
-	public int size() {
-		return args.length;
-	}
+  private ArgVector(ArgumentSet argSet, int[] args) {
+    super();
+    this.argSet = argSet;
+    this.args = args.clone();
+  }
 
-	/**
-	 * Gets the actual argument values.
-	 *
-	 * @return the arg vals
-	 */
-	public Object[] getArgVals() {
-		if (argVals == null) {
-			argVals = fillIn();
-		}
-		return argVals;
-	}
+  /**
+   * number of arguments.
+   *
+   * @return the size
+   */
+  public int size() {
+    return args.length;
+  }
 
-	/**
-	 * Return a copy of vector with specified column set.
-	 *
-	 * @param extraValue
-	 *            the extra value
-	 * @param col
-	 *            the col
-	 * @return the arg vector
-	 */
-	public ArgVector withValue(int extraValue, int col) {
+  /**
+   * Gets the actual argument values.
+   *
+   * @return the arg vals
+   */
+  public Object[] getArgVals() {
+    if (argVals == null) {
+      argVals = fillIn();
+    }
+    return argVals;
+  }
 
-		ArgVector withValue = new ArgVector(argSet, args);
+  /**
+   * Return a copy of vector with specified column set.
+   *
+   * @param extraValue
+   *            the extra value
+   * @param col
+   *            the col
+   * @return the arg vector
+   */
+  public ArgVector withValue(int extraValue, int col) {
 
-		withValue.args[col] = extraValue;
-		return withValue;
-	}
+    ArgVector withValue = new ArgVector(argSet, args);
 
-	private Object[] fillIn() {
+    withValue.args[col] = extraValue;
+    return withValue;
+  }
 
-		Object[] ret = new Object[args.length];
+  private Object[] fillIn() {
 
-		for (int i = 0; i < args.length; i++) {
-			if (args[i] >= 0) {
-				ret[i] = argSet.argsValues.get(i).get(args[i]);
-			}
-		}
-		return ret;
-	}
+    Object[] ret = new Object[args.length];
 
-	@Override
-	public String toString() {
-		return Arrays.toString(args);
-	}
+    for (int i = 0; i < args.length; i++) {
+      if (args[i] >= 0) {
+        ret[i] = argSet.argsValues.get(i).get(args[i]);
+      }
+    }
+    return ret;
+  }
+
+  @Override
+  public String toString() {
+    return Arrays.toString(args);
+  }
 
 }

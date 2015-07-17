@@ -1,3 +1,4 @@
+
 package com.github.radm.theories.runner;
 
 import java.util.List;
@@ -11,14 +12,20 @@ import org.junit.runners.model.InitializationError;
  */
 public class TheoriesWrapper extends Theories {
 
-	public TheoriesWrapper(Class<?> klass) throws InitializationError {
-		super(klass);
-	}
+  /**
+   * Instantiates a new theories wrapper.
+   *
+   * @param klass the klass
+   * @throws InitializationError the initialization error
+   */
+  public TheoriesWrapper(Class<?> klass) throws InitializationError {
+    super(klass);
+  }
 
-	@Override
-	public List<FrameworkMethod> computeTestMethods() {
-		return super.computeTestMethods();
-	}
+  @Override
+  public List<FrameworkMethod> computeTestMethods() {
+    return super.computeTestMethods();
+  }
 
 
 }

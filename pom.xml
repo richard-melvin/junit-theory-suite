@@ -4,7 +4,7 @@
  <modelVersion>4.0.0</modelVersion>
  <groupId>com.github.richard-melvin</groupId>
  <artifactId>junit-theory-suite</artifactId>
- <version>0.7.1</version>
+ <version>0.7.2</version>
  <name>Junit Theory Suite runner</name>
  <properties>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

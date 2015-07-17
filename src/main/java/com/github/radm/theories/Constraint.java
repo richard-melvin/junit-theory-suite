@@ -1,5 +1,15 @@
+/*******************************************************************************
+ *     Copyright (c) 2015 European Space Agency
+ *     All Rights Reserved
+ *
+ *     Project:   SOIS Electronic Data Sheets
+ *
+ *     Module:    SEDS Tooling
+ *
+ *     Author:    SciSys UK Ltd.
+ *
+ *******************************************************************************/
 package com.github.radm.theories;
-
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -9,16 +19,21 @@ import static java.lang.annotation.RetentionPolicy.*;
 
 /**
  * A constraint is a public static boolean function with one or more arguments.
- *
- * For each set of potential argument values to a theory function, those failing a constraint will be discarded
- * before the function is called.
- *
- * Constraints with no value set are considered global, and apply to all theories that have a sequence of arguments of matching type.
- * Other constraints are only used when referenced by the annotation {@link WithConstraints}.
+ * For each set of potential argument values to a theory function, those failing
+ * a constraint will be discarded before the function is called. Constraints
+ * with no value set are considered global, and apply to all theories that have
+ * a sequence of arguments of matching type. Other constraints are only used
+ * when referenced by the annotation {@link WithConstraints}.
  */
 @Retention(RUNTIME)
 @Target(METHOD)
-public @interface Constraint {
-    String value() default "";
+public @interface Constraint
+{
+
+  /**
+   *
+   * @return the explicit constraint name
+   */
+  String value() default "";
 
 }

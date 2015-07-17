@@ -1,3 +1,14 @@
+/*******************************************************************************
+ *     Copyright (c) 2015 European Space Agency
+ *     All Rights Reserved
+ *
+ *     Project:   SOIS Electronic Data Sheets
+ *
+ *     Module:    SEDS Tooling
+ *
+ *     Author:    SciSys UK Ltd.
+ *
+ *******************************************************************************/
 package com.github.radm.theories.runner;
 
 import java.lang.reflect.Method;
@@ -14,68 +25,74 @@ import org.slf4j.LoggerFactory;
  */
 public class MethodWithArguments extends FrameworkMethod {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(MethodWithArguments.class);
+  private static final Logger LOG = LoggerFactory
+      .getLogger(MethodWithArguments.class);
 
-	private final Object[] args;
+  private final Object[] args;
 
-	public MethodWithArguments(Method method, Object[] args) {
-		super(method);
-		this.args = args;
-	}
+  /**
+   * Instantiates a new method with arguments.
+   *
+   * @param method the method
+   * @param args the args
+   */
+  public MethodWithArguments(Method method, Object[] args) {
+    super(method);
+    this.args = args;
+  }
 
-	@Override
-	public Object invokeExplosively(Object target, Object... params)
-			throws Throwable {
+  @Override
+  public Object invokeExplosively(Object target, Object... params)
+      throws Throwable {
 
-		LOG.trace("Executing {}", this);
+    LOG.trace("Executing {}", this);
 
-		return super.invokeExplosively(target, args);
-	}
+    return super.invokeExplosively(target, args);
+  }
 
-	@Override
-	public String getName() {
+  @Override
+  public String getName() {
 
-		StringJoiner sj = new StringJoiner(",", super.getName() + "[", "]");
+    StringJoiner sj = new StringJoiner(",", super.getName() + "[", "]");
 
-		for (int i = 0; i < args.length; i++) {
-			sj.add(Objects.toString(args[i]));
-		}
+    for (int i = 0; i < args.length; i++) {
+      sj.add(Objects.toString(args[i]));
+    }
 
-		return sj.toString();
-	}
+    return sj.toString();
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (!super.equals(obj)) {
-			return false;
-		}
+  @Override
+  public boolean equals(Object obj) {
+    if (!super.equals(obj)) {
+      return false;
+    }
 
-		if (!(obj instanceof MethodWithArguments)) {
-			return false;
-		}
-		MethodWithArguments other = (MethodWithArguments) obj;
+    if (!(obj instanceof MethodWithArguments)) {
+      return false;
+    }
+    MethodWithArguments other = (MethodWithArguments) obj;
 
-		return Arrays.equals(args, other.args);
-	}
+    return Arrays.equals(args, other.args);
+  }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(getMethod(), Arrays.hashCode(args));
-	}
+  @Override
+  public int hashCode() {
+    return Objects.hash(getMethod(), Arrays.hashCode(args));
+  }
 
-	@Override
-	public String toString() {
-		return getName();
-	}
+  @Override
+  public String toString() {
+    return getName();
+  }
 
-	/**
-	 * Gets the underlying method, without arguments specified.
-	 *
-	 * @return the parent
-	 */
-	public FrameworkMethod getParent()
-	{
-		return new FrameworkMethod(getMethod());
-	}
+  /**
+   * Gets the underlying method, without arguments specified.
+   *
+   * @return the parent
+   */
+  public FrameworkMethod getParent()
+  {
+    return new FrameworkMethod(getMethod());
+  }
 }

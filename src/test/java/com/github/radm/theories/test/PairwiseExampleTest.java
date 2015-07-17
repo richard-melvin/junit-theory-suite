@@ -17,7 +17,7 @@ import com.github.radm.theories.TheorySuite;
  */
 @RunWith(TheorySuite.class)
 @Pairwise
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "javadoc"})
 public class PairwiseExampleTest
 {
 
