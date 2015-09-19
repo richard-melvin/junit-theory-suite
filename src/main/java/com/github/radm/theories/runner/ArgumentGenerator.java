@@ -1,14 +1,3 @@
-/*******************************************************************************
- *     Copyright (c) 2015 European Space Agency
- *     All Rights Reserved
- *
- *     Project:   SOIS Electronic Data Sheets
- *
- *     Module:    SEDS Tooling
- *
- *     Author:    SciSys UK Ltd.
- *
- *******************************************************************************/
 package com.github.radm.theories.runner;
 
 import java.util.ArrayList;
@@ -32,86 +21,86 @@ import com.github.radm.theories.pairwise.ArgumentSet;
  */
 public class ArgumentGenerator {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ArgumentGenerator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ArgumentGenerator.class);
 
-	private final PotentialAssignmentFinder finder;
+    private final PotentialAssignmentFinder finder;
 
-	private final FrameworkMethod testMethod;
+    private final FrameworkMethod testMethod;
 
-	private final List<MethodWithArguments> testsCalls = new ArrayList<>();
+    private final List<MethodWithArguments> testsCalls = new ArrayList<>();
 
-	private final ConstraintFinder constraints;
+    private final ConstraintFinder constraints;
 
-	/**
-	 * Instantiates a new argument generator.
-	 *
-	 * @param finder
-	 *            the assignment finder
-	 * @param constraints
-	 *            the constraints
-	 * @param testMethod
-	 *            the test method
-	 */
-	public ArgumentGenerator(PotentialAssignmentFinder finder, ConstraintFinder constraints,
-			FrameworkMethod testMethod) {
-		super();
-		this.finder = finder;
-		this.testMethod = testMethod;
-		this.constraints = constraints;
-	}
+    /**
+     * Instantiates a new argument generator.
+     *
+     * @param finder
+     *            the assignment finder
+     * @param constraints
+     *            the constraints
+     * @param testMethod
+     *            the test method
+     */
+    public ArgumentGenerator(PotentialAssignmentFinder finder, ConstraintFinder constraints,
+            FrameworkMethod testMethod) {
+        super();
+        this.finder = finder;
+        this.testMethod = testMethod;
+        this.constraints = constraints;
+    }
 
-	/**
-	 * Compute the set of methods with known argument values.
-	 *
-	 * @return the collection
-	 * @throws Throwable
-	 *             if something goes wrong with test code calculating arguments
-	 */
-	public Collection<MethodWithArguments> computeTestMethodsWithArgs() throws Throwable {
+    /**
+     * Compute the set of methods with known argument values.
+     *
+     * @return the collection
+     * @throws Throwable
+     *             if something goes wrong with test code calculating arguments
+     */
+    public Collection<MethodWithArguments> computeTestMethodsWithArgs() throws Throwable {
 
-		LOG.debug("computing cases for {}", testMethod.getName());
-		List<ParameterSignature> signatures = ParameterSignature.signatures(testMethod.getMethod());
-		List<String> colNames = new ArrayList<>(
-				signatures.stream().map(ParameterSignature::getName).collect(Collectors.toList()));
+        LOG.debug("computing cases for {}", testMethod.getName());
+        List<ParameterSignature> signatures = ParameterSignature.signatures(testMethod.getMethod());
+        List<String> colNames = new ArrayList<>(
+                signatures.stream().map(ParameterSignature::getName).collect(Collectors.toList()));
 
-		List<List<Object>> allArgValues = new ArrayList<>(signatures.size());
-		for (ParameterSignature sig : signatures) {
-			List<PotentialAssignment> potentialsFor = finder.potentialsFor(sig);
-			List<Object> argVal = new ArrayList<>(potentialsFor.size());
+        List<List<Object>> allArgValues = new ArrayList<>(signatures.size());
+        for (ParameterSignature sig : signatures) {
+            List<PotentialAssignment> potentialsFor = finder.potentialsFor(sig);
+            List<Object> argVal = new ArrayList<>(potentialsFor.size());
 
-			for (PotentialAssignment pa : potentialsFor) {
-				argVal.add(pa.getValue());
-			}
-			allArgValues.add(argVal);
-		}
+            for (PotentialAssignment pa : potentialsFor) {
+                argVal.add(pa.getValue());
+            }
+            allArgValues.add(argVal);
+        }
 
-		ArgumentSet as = new ArgumentSet(colNames, allArgValues);
-		constraints.applyConstraintsTo(testMethod, as);
+        ArgumentSet as = new ArgumentSet(colNames, allArgValues);
+        constraints.applyConstraintsTo(testMethod, as);
 
-		final Iterator<ArgVector> iter;
-		if (isPairWise()) {
-			iter = as.pairwiseIterator();
-		} else {
-			iter = as.iterator();
-		}
+        final Iterator<ArgVector> iter;
+        if (isPairWise()) {
+            iter = as.pairwiseIterator();
+        } else {
+            iter = as.iterator();
+        }
 
-		while (iter.hasNext()) {
-			ArgVector argVector = iter.next();
-			Object[] rawArgs = argVector.getArgVals();
-			assert rawArgs.length == testMethod.getMethod().getParameterCount();
-			MethodWithArguments testCall = new MethodWithArguments(testMethod.getMethod(), rawArgs);
+        while (iter.hasNext()) {
+            ArgVector argVector = iter.next();
+            Object[] rawArgs = argVector.getArgVals();
+            assert rawArgs.length == testMethod.getMethod().getParameterCount();
+            MethodWithArguments testCall = new MethodWithArguments(testMethod.getMethod(), rawArgs);
 
-			LOG.trace("Identified test case {}", testCall);
+            LOG.trace("Identified test case {}", testCall);
 
-			testsCalls.add(testCall);
-		}
+            testsCalls.add(testCall);
+        }
 
-		return testsCalls;
-	}
+        return testsCalls;
+    }
 
-	private boolean isPairWise() {
-		return testMethod.getMethod().isAnnotationPresent(Pairwise.class)
-				|| testMethod.getDeclaringClass().isAnnotationPresent(Pairwise.class);
-	}
+    private boolean isPairWise() {
+        return testMethod.getMethod().isAnnotationPresent(Pairwise.class)
+                || testMethod.getDeclaringClass().isAnnotationPresent(Pairwise.class);
+    }
 
 }

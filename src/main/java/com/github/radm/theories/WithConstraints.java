@@ -14,10 +14,10 @@ import static java.lang.annotation.RetentionPolicy.*;
 @Target(METHOD)
 public @interface WithConstraints {
 
-	/**
-	 *
-	 * @return the exlicit set of constraint names to use
-	 */
-	String[]value();
+    /**
+     *
+     * @return the exlicit set of constraint names to use
+     */
+    String[]value();
 
 }

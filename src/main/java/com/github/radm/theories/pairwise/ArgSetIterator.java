@@ -8,38 +8,38 @@ import java.util.Iterator;
  */
 public abstract class ArgSetIterator implements Iterator<ArgVector> {
 
-	protected final ArgumentSet args;
+    protected final ArgumentSet args;
 
-	protected boolean knownComplete = false;
-	protected ArgVector nextValue = null;
+    protected boolean knownComplete = false;
+    protected ArgVector nextValue = null;
 
-	protected abstract ArgVector computeNext();
+    protected abstract ArgVector computeNext();
 
-	protected ArgSetIterator(ArgumentSet args) {
-		this.args = args;
+    protected ArgSetIterator(ArgumentSet args) {
+        this.args = args;
 
-	}
+    }
 
-	@Override
-	public boolean hasNext() {
-		if (knownComplete) {
-			return false;
-		}
-		if (nextValue != null) {
-			return true;
-		}
+    @Override
+    public boolean hasNext() {
+        if (knownComplete) {
+            return false;
+        }
+        if (nextValue != null) {
+            return true;
+        }
 
-		nextValue = computeNext();
+        nextValue = computeNext();
 
-		return !knownComplete;
-	}
+        return !knownComplete;
+    }
 
-	@Override
-	public ArgVector next() {
-		assert nextValue != null;
-		ArgVector ret = nextValue;
-		nextValue = null;
-		return ret;
-	}
+    @Override
+    public ArgVector next() {
+        assert nextValue != null;
+        ArgVector ret = nextValue;
+        nextValue = null;
+        return ret;
+    }
 
 }

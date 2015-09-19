@@ -17,20 +17,20 @@ import com.github.radm.theories.TheorySuite;
 @RunWith(TheorySuite.class)
 public class ExampleTest {
 
-	@DataPoints
-	public static List<Year> years = IntStream.range(1995, 1999).boxed()
-			.map(Year::of).collect(Collectors.toList());
+  @DataPoints
+  public static List<Year> years = IntStream.range(1995, 1999).boxed()
+      .map(Year::of).collect(Collectors.toList());
 
-	@Theory
-	public void theoryOnYearOnly(Year year) {
-		if (year.isLeap()) {
-			assertEquals(Month.FEBRUARY.maxLength(),
-					year.atMonth(Month.FEBRUARY).lengthOfMonth());
-		} else {
-			assertEquals(Month.FEBRUARY.minLength(),
-					year.atMonth(Month.FEBRUARY).lengthOfMonth());
-		}
-	}
+  @Theory
+  public void theoryOnYearOnly(Year year) {
+    if (year.isLeap()) {
+      assertEquals(Month.FEBRUARY.maxLength(),
+          year.atMonth(Month.FEBRUARY).lengthOfMonth());
+    } else {
+      assertEquals(Month.FEBRUARY.minLength(),
+          year.atMonth(Month.FEBRUARY).lengthOfMonth());
+    }
+  }
 
 ```
 
@@ -56,18 +56,18 @@ To use it, simply:
 
 ```xml
 
-	<repository>
-	    <id>jitpack.io</id>
-	    <url>https://jitpack.io</url>
-	</repository>
+  <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+  </repository>
 
 
-	<dependency>
-	    <groupId>com.github.richard-melvin</groupId>
-	    <artifactId>junit-theory-suite</artifactId>
-	    <version>0.7.2</version>
-	    <scope>test</scope>
-	</dependency>
+  <dependency>
+      <groupId>com.github.richard-melvin</groupId>
+      <artifactId>junit-theory-suite</artifactId>
+      <version>0.7.2</version>
+      <scope>test</scope>
+  </dependency>
 
 ```
 

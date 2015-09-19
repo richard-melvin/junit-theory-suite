@@ -1,14 +1,3 @@
-/*******************************************************************************
- *     Copyright (c) 2015 European Space Agency
- *     All Rights Reserved
- *
- *     Project:   SOIS Electronic Data Sheets
- *
- *     Module:    SEDS Tooling
- *
- *     Author:    SciSys UK Ltd.
- *
- *******************************************************************************/
 package com.github.radm.theories;
 
 import java.lang.annotation.Retention;
@@ -29,10 +18,10 @@ import static java.lang.annotation.RetentionPolicy.*;
 @Target(METHOD)
 public @interface Constraint {
 
-	/**
-	 *
-	 * @return the explicit constraint name
-	 */
-	String value() default "";
+    /**
+     *
+     * @return the explicit constraint name
+     */
+    String value() default "";
 
 }

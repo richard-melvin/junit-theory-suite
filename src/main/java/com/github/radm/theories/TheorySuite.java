@@ -36,301 +36,301 @@ import com.github.radm.theories.runner.TheoriesWrapper;
  */
 public class TheorySuite extends BlockJUnit4ClassRunner {
 
-	private static final Logger LOG = LoggerFactory.getLogger(TheorySuite.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TheorySuite.class);
 
-	/**
-	 * currently reuses some of the implementation of the default theories
-	 * runner.
-	 */
-	private TheoriesWrapper embeddedRunner;
+    /**
+     * currently reuses some of the implementation of the default theories
+     * runner.
+     */
+    private TheoriesWrapper embeddedRunner;
 
-	private List<Throwable> initFail = null;
+    private List<Throwable> initFail = null;
 
-	private List<FrameworkMethod> allMethodsWithAllArgs;
+    private List<FrameworkMethod> allMethodsWithAllArgs;
 
-	private Map<FrameworkMethod, Description> descriptions;
+    private Map<FrameworkMethod, Description> descriptions;
 
-	private Description suiteDescription;
+    private Description suiteDescription;
 
-	private Map<Method, AssumptionsFailureCounter> checksByMethod;
+    private Map<Method, AssumptionsFailureCounter> checksByMethod;
 
-	private PotentialAssignmentFinder finder;
+    private PotentialAssignmentFinder finder;
 
-	private ConstraintFinder constraints;
+    private ConstraintFinder constraints;
 
-	private Filter filter;
+    private Filter filter;
 
-	private Sorter sorter;
+    private Sorter sorter;
 
-	/**
-	 * Instantiates a new theory suite.
-	 *
-	 * @param testClass
-	 *            the test class
-	 * @throws InitializationError
-	 *             if illegal annotations found
-	 */
-	public TheorySuite(Class<?> testClass) throws InitializationError {
-		super(testClass);
+    /**
+     * Instantiates a new theory suite.
+     *
+     * @param testClass
+     *            the test class
+     * @throws InitializationError
+     *             if illegal annotations found
+     */
+    public TheorySuite(Class<?> testClass) throws InitializationError {
+        super(testClass);
 
-		LOG.debug("Constructor init complete");
-		if (initFail != null) {
-			throw new InitializationError(initFail);
-		}
+        LOG.debug("Constructor init complete");
+        if (initFail != null) {
+            throw new InitializationError(initFail);
+        }
 
-	}
+    }
 
-	/**
-	 * The defines the tree of tests that will be run.
-	 */
-	@Override
-	public Description getDescription() {
+    /**
+     * The defines the tree of tests that will be run.
+     */
+    @Override
+    public Description getDescription() {
 
-		ensureInit();
-		if (filter != Filter.ALL || sorter != null) {
-			suiteDescription = rebuildDescriptionByFilter(suiteDescription);
-		}
+        ensureInit();
+        if (filter != Filter.ALL || sorter != null) {
+            suiteDescription = rebuildDescriptionByFilter(suiteDescription);
+        }
 
-		return suiteDescription;
-	}
+        return suiteDescription;
+    }
 
-	private Description rebuildDescriptionByFilter(Description description) {
+    private Description rebuildDescriptionByFilter(Description description) {
 
-		Description ret = description.childlessCopy();
+        Description ret = description.childlessCopy();
 
-		ArrayList<Description> children = description.getChildren();
-		if (sorter != null) {
-			children.sort(sorter);
-		}
-		for (Description child : children) {
-			if (filterAppliesToAny(child, filter)) {
-				ret.addChild(rebuildDescriptionByFilter(child));
-			}
-		}
-		return ret;
+        ArrayList<Description> children = description.getChildren();
+        if (sorter != null) {
+            children.sort(sorter);
+        }
+        for (Description child : children) {
+            if (filterAppliesToAny(child, filter)) {
+                ret.addChild(rebuildDescriptionByFilter(child));
+            }
+        }
+        return ret;
 
-	}
+    }
 
-	private static boolean filterAppliesToAny(Description d, Filter f) {
-		if (f.shouldRun(d)) {
-			return true;
-		}
+    private static boolean filterAppliesToAny(Description d, Filter f) {
+        if (f.shouldRun(d)) {
+            return true;
+        }
 
-		for (Description c : d.getChildren()) {
-			if (filterAppliesToAny(c, f)) {
-				return true;
-			}
-		}
+        for (Description c : d.getChildren()) {
+            if (filterAppliesToAny(c, f)) {
+                return true;
+            }
+        }
 
-		return false;
+        return false;
 
-	}
+    }
 
-	@Override
-	protected void collectInitializationErrors(List<Throwable> errors) {
+    @Override
+    protected void collectInitializationErrors(List<Throwable> errors) {
 
-		computeTestMethods();
-		if (initFail != null) {
-			errors.addAll(initFail);
-			initFail = null;
-		}
+        computeTestMethods();
+        if (initFail != null) {
+            errors.addAll(initFail);
+            initFail = null;
+        }
 
-	}
+    }
 
-	@Override
-	protected List<FrameworkMethod> computeTestMethods() {
-
-		TheoriesWrapper runner = getEmbeddedRunner();
-
-		if (runner == null) {
-			return super.computeTestMethods();
-		}
-
-		ensureInit();
-		if (allMethodsWithAllArgs == null) {
-			computeTestMethodsWithArgs(runner);
-
-		}
-
-		return allMethodsWithAllArgs;
-	}
-
-	@Override
-	public void filter(Filter newFilter) throws NoTestsRemainException {
-		super.filter(newFilter);
-
-		this.filter = newFilter;
-	}
-
-	@Override
-	public void sort(Sorter newSorter) {
-		super.sort(newSorter);
-
-		this.sorter = newSorter;
-	}
-
-	private void computeTestMethodsWithArgs(TheoriesWrapper runner) {
-		allMethodsWithAllArgs = new ArrayList<>();
-
-		for (FrameworkMethod fm : runner.computeTestMethods()) {
-
-			if (fm.getAnnotation(Theory.class) == null) {
-				recordNonTheoryCase(fm);
-			} else {
-				recordTheoryCase(runner, fm);
-			}
-
-			if (initFail != null) {
-				break;
-			}
-		}
-	}
-
-	@Override
-	protected void runChild(final FrameworkMethod fm, RunNotifier notifier) {
-
-		if (checksByMethod.containsKey(fm.getMethod())) {
-			AssumptionsFailureCounter listener = checksByMethod.get(fm.getMethod());
-
-			notifier.addListener(listener);
-			try {
-				super.runChild(fm, notifier);
-				if (!listener.isWithinLimit()) {
-					MethodWithArguments mwa = (MethodWithArguments) fm;
-					notifier.fireTestFailure(new Failure(describeChild(mwa.getParent()),
-							new AssertionError("Never found parameters that satisfied method assumptions.")));
-				}
-			} finally {
-				notifier.removeListener(listener);
-			}
-		} else {
-			super.runChild(fm, notifier);
-		}
-	}
+    @Override
+    protected List<FrameworkMethod> computeTestMethods() {
+
+        TheoriesWrapper runner = getEmbeddedRunner();
+
+        if (runner == null) {
+            return super.computeTestMethods();
+        }
+
+        ensureInit();
+        if (allMethodsWithAllArgs == null) {
+            computeTestMethodsWithArgs(runner);
+
+        }
+
+        return allMethodsWithAllArgs;
+    }
+
+    @Override
+    public void filter(Filter newFilter) throws NoTestsRemainException {
+        super.filter(newFilter);
+
+        this.filter = newFilter;
+    }
+
+    @Override
+    public void sort(Sorter newSorter) {
+        super.sort(newSorter);
+
+        this.sorter = newSorter;
+    }
+
+    private void computeTestMethodsWithArgs(TheoriesWrapper runner) {
+        allMethodsWithAllArgs = new ArrayList<>();
+
+        for (FrameworkMethod fm : runner.computeTestMethods()) {
+
+            if (fm.getAnnotation(Theory.class) == null) {
+                recordNonTheoryCase(fm);
+            } else {
+                recordTheoryCase(runner, fm);
+            }
+
+            if (initFail != null) {
+                break;
+            }
+        }
+    }
+
+    @Override
+    protected void runChild(final FrameworkMethod fm, RunNotifier notifier) {
+
+        if (checksByMethod.containsKey(fm.getMethod())) {
+            AssumptionsFailureCounter listener = checksByMethod.get(fm.getMethod());
+
+            notifier.addListener(listener);
+            try {
+                super.runChild(fm, notifier);
+                if (!listener.isWithinLimit()) {
+                    MethodWithArguments mwa = (MethodWithArguments) fm;
+                    notifier.fireTestFailure(new Failure(describeChild(mwa.getParent()),
+                            new AssertionError("Never found parameters that satisfied method assumptions.")));
+                }
+            } finally {
+                notifier.removeListener(listener);
+            }
+        } else {
+            super.runChild(fm, notifier);
+        }
+    }
 
-	@Override
-	protected Description describeChild(FrameworkMethod method) {
-
-		assert descriptions.containsKey(method);
-
-		return descriptions.get(method);
-
-	}
-
-	/**
-	 * Initialise all data members. Needed as a lot of work gets done before
-	 * constructor completes.
-	 */
-	private void ensureInit() {
-		if (suiteDescription == null) {
-
-			suiteDescription = Description.createSuiteDescription(getTestClass().getJavaClass());
-			descriptions = new IdentityHashMap<>();
-			checksByMethod = new ConcurrentHashMap<>();
-			finder = new PotentialAssignmentFinder(getTestClass());
-			constraints = new ConstraintFinder(getTestClass(), this::reportError);
-			filter = Filter.ALL;
-		}
-	}
-
-	/**
-	 * record everything for a simple test.
-	 *
-	 * @param fm
-	 *            the framework method
-	 */
-	private void recordNonTheoryCase(FrameworkMethod fm) {
-
-		Description desc = Description.createTestDescription(suiteDescription.getTestClass(), fm.getName());
-		LOG.debug("non-theory test {} ", fm);
-
-		if (filter.shouldRun(desc)) {
-			LOG.trace("passes filter as {} ", desc);
-
-			allMethodsWithAllArgs.add(fm);
-			suiteDescription.addChild(desc);
-
-			descriptions.put(fm, desc);
-		}
-
-	}
-
-	/**
-	 * Record everything for a theory.
-	 *
-	 * @param runner
-	 *            the runner
-	 * @param fm
-	 *            the framework method
-	 */
-	private void recordTheoryCase(TheoriesWrapper runner, FrameworkMethod fm) {
-
-		try {
-			Collection<MethodWithArguments> methodCases = new ArgumentGenerator(finder, constraints, fm)
-					.computeTestMethodsWithArgs();
-			Description methodDescription = Description.createSuiteDescription(fm.getName());
-
-			if (filter.shouldRun(methodDescription)) {
-
-				descriptions.put(fm, methodDescription);
-
-				suiteDescription.addChild(methodDescription);
-				if (methodCases.isEmpty()) {
-					reportError(new Error("No test cases found for " + fm + "; missing annotations?"));
-				} else {
-					recordCases(methodDescription, methodCases);
-
-					checksByMethod.put(fm.getMethod(), new AssumptionsFailureCounter(methodCases.size()));
-					LOG.debug("theory {} has {} cases", fm, methodCases.size());
-
-				}
-			}
-
-		} catch (Throwable e) {
-			LOG.debug("collecting arguments", e);
-
-			reportError(e);
-		}
-	}
-
-	private void recordCases(Description methodDescription, Collection<MethodWithArguments> methodCases) {
-		allMethodsWithAllArgs.addAll(methodCases);
-
-		for (MethodWithArguments testCase : methodCases) {
-			Description testDescription = Description.createTestDescription(getTestClass().getJavaClass(),
-					testCase.getName());
-
-			methodDescription.addChild(testDescription);
-			descriptions.put(testCase, testDescription);
-		}
-
-	}
-
-	/**
-	 * Gets the embedded runner; needed as virtual methods get called from super
-	 * constructor
-	 *
-	 * @return the embedded runner
-	 */
-	private TheoriesWrapper getEmbeddedRunner() {
-		if (embeddedRunner == null) {
-			try {
-				embeddedRunner = new TheoriesWrapper(getTestClass().getJavaClass());
-			} catch (InitializationError e) {
-				initFail = e.getCauses();
-			}
-		}
-
-		return embeddedRunner;
-	}
-
-	private void reportError(Throwable t) {
-		LOG.debug(t.toString());
-
-		if (initFail == null) {
-			initFail = new ArrayList<>();
-		}
-
-		initFail.add(t);
-	}
+    @Override
+    protected Description describeChild(FrameworkMethod method) {
+
+        assert descriptions.containsKey(method);
+
+        return descriptions.get(method);
+
+    }
+
+    /**
+     * Initialise all data members. Needed as a lot of work gets done before
+     * constructor completes.
+     */
+    private void ensureInit() {
+        if (suiteDescription == null) {
+
+            suiteDescription = Description.createSuiteDescription(getTestClass().getJavaClass());
+            descriptions = new IdentityHashMap<>();
+            checksByMethod = new ConcurrentHashMap<>();
+            finder = new PotentialAssignmentFinder(getTestClass());
+            constraints = new ConstraintFinder(getTestClass(), this::reportError);
+            filter = Filter.ALL;
+        }
+    }
+
+    /**
+     * record everything for a simple test.
+     *
+     * @param fm
+     *            the framework method
+     */
+    private void recordNonTheoryCase(FrameworkMethod fm) {
+
+        Description desc = Description.createTestDescription(suiteDescription.getTestClass(), fm.getName());
+        LOG.debug("non-theory test {} ", fm);
+
+        if (filter.shouldRun(desc)) {
+            LOG.trace("passes filter as {} ", desc);
+
+            allMethodsWithAllArgs.add(fm);
+            suiteDescription.addChild(desc);
+
+            descriptions.put(fm, desc);
+        }
+
+    }
+
+    /**
+     * Record everything for a theory.
+     *
+     * @param runner
+     *            the runner
+     * @param fm
+     *            the framework method
+     */
+    private void recordTheoryCase(TheoriesWrapper runner, FrameworkMethod fm) {
+
+        try {
+            Collection<MethodWithArguments> methodCases = new ArgumentGenerator(finder, constraints, fm)
+                    .computeTestMethodsWithArgs();
+            Description methodDescription = Description.createSuiteDescription(fm.getName());
+
+            if (filter.shouldRun(methodDescription)) {
+
+                descriptions.put(fm, methodDescription);
+
+                suiteDescription.addChild(methodDescription);
+                if (methodCases.isEmpty()) {
+                    reportError(new Error("No test cases found for " + fm + "; missing annotations?"));
+                } else {
+                    recordCases(methodDescription, methodCases);
+
+                    checksByMethod.put(fm.getMethod(), new AssumptionsFailureCounter(methodCases.size()));
+                    LOG.debug("theory {} has {} cases", fm, methodCases.size());
+
+                }
+            }
+
+        } catch (Throwable e) {
+            LOG.debug("collecting arguments", e);
+
+            reportError(e);
+        }
+    }
+
+    private void recordCases(Description methodDescription, Collection<MethodWithArguments> methodCases) {
+        allMethodsWithAllArgs.addAll(methodCases);
+
+        for (MethodWithArguments testCase : methodCases) {
+            Description testDescription = Description.createTestDescription(getTestClass().getJavaClass(),
+                    testCase.getName());
+
+            methodDescription.addChild(testDescription);
+            descriptions.put(testCase, testDescription);
+        }
+
+    }
+
+    /**
+     * Gets the embedded runner; needed as virtual methods get called from super
+     * constructor
+     *
+     * @return the embedded runner
+     */
+    private TheoriesWrapper getEmbeddedRunner() {
+        if (embeddedRunner == null) {
+            try {
+                embeddedRunner = new TheoriesWrapper(getTestClass().getJavaClass());
+            } catch (InitializationError e) {
+                initFail = e.getCauses();
+            }
+        }
+
+        return embeddedRunner;
+    }
+
+    private void reportError(Throwable t) {
+        LOG.debug(t.toString());
+
+        if (initFail == null) {
+            initFail = new ArrayList<>();
+        }
+
+        initFail.add(t);
+    }
 }

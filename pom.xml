@@ -139,5 +139,4 @@
   </license>
  </licenses>
  <inceptionYear>2013</inceptionYear>
->>>>>>> ed4b9f4 fix #5 - match constraints using isAssignableFrom
 </project>
