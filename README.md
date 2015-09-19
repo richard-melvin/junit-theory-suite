@@ -5,7 +5,7 @@
 
 
 junit-theory-suite is a simple library that replaces the default [JUnit](https://github.com/junit-team/junit)
-[theories](https://github.com/junit-team/junit/wiki/Theories) runner. The key improvements are: 
+[theories](https://github.com/junit-team/junit/wiki/Theories) runner. The key improvements are:
 
 - treats each individual combination of parameters as a distinct test case.
 - optionally select [All-Pairs](https://en.wikipedia.org/wiki/All-pairs_testing) test case selection instead of the default exhaustive
@@ -65,7 +65,7 @@ To use it, simply:
 	<dependency>
 	    <groupId>com.github.richard-melvin</groupId>
 	    <artifactId>junit-theory-suite</artifactId>
-	    <version>0.7.0</version>
+	    <version>0.7.2</version>
 	    <scope>test</scope>
 	</dependency>
 
@@ -94,10 +94,7 @@ see [QuickCheckIntegrationTest](src/test/java/com/github/radm/theories/test/Quic
 
 [pitest](https://github.com/hcoles/pitest) provides mutation test coverage, which is very useful when doing theory-based testing to confirm you are actually properly testing the software and not just exercising it.
 
-[jcunit](https://github.com/dakusui/jcunit) does combinatorial testing using junit, which is useful to select an optimal subset of possible tests to be run. Unfortunately jcunit is an alternative, not a complement to junit-theory-suite, due to JUnit architectural restrictions:
-
-- you can only have one test runner
-- you can't do something as complex as theories without using a custom runner.
+[jcunit](https://github.com/dakusui/jcunit) does is an alternative approach to combinatorial testing using junit.
 
 [slf4j](http://www.slf4j.org/) is used for logging; this is the only dependency other than junit itself.
 
