@@ -19,84 +19,85 @@ import java.util.Arrays;
  */
 public class ArgVector {
 
-  private final ArgumentSet argSet;
+	private final ArgumentSet argSet;
 
-  /** The args. */
-  public final int[] args;
-  private Object[] argVals;
+	/** The args. */
+	public final int[] args;
+	private Object[] argVals;
 
-  /**
-   * Instantiates a new arg vector.
-   *
-   * @param argSet the arg set
-   */
-  public ArgVector(ArgumentSet argSet) {
-    super();
-    this.argSet = argSet;
-    args = new int[argSet.argNames.size()];
-    Arrays.setAll(args, i -> -1);
+	/**
+	 * Instantiates a new arg vector.
+	 *
+	 * @param argSet
+	 *            the arg set
+	 */
+	public ArgVector(ArgumentSet argSet) {
+		super();
+		this.argSet = argSet;
+		args = new int[argSet.argNames.size()];
+		Arrays.setAll(args, i -> -1);
 
-  }
+	}
 
-  private ArgVector(ArgumentSet argSet, int[] args) {
-    super();
-    this.argSet = argSet;
-    this.args = args.clone();
-  }
+	private ArgVector(ArgumentSet argSet, int[] args) {
+		super();
+		this.argSet = argSet;
+		this.args = args.clone();
+	}
 
-  /**
-   * number of arguments.
-   *
-   * @return the size
-   */
-  public int size() {
-    return args.length;
-  }
+	/**
+	 * number of arguments.
+	 *
+	 * @return the size
+	 */
+	public int size() {
+		return args.length;
+	}
 
-  /**
-   * Gets the actual argument values.
-   *
-   * @return the arg vals
-   */
-  public Object[] getArgVals() {
-    if (argVals == null) {
-      argVals = fillIn();
-    }
-    return argVals;
-  }
+	/**
+	 * Gets the actual argument values.
+	 *
+	 * @return the arg vals
+	 */
+	public Object[] getArgVals() {
+		if (argVals == null) {
+			argVals = fillIn();
+		}
+		return argVals;
+	}
 
-  /**
-   * Return a copy of vector with specified column set.
-   *
-   * @param extraValue
-   *            the extra value
-   * @param col
-   *            the col
-   * @return the arg vector
-   */
-  public ArgVector withValue(int extraValue, int col) {
+	/**
+	 * Return a copy of vector with specified column set.
+	 *
+	 * @param extraValue
+	 *            the extra value
+	 * @param col
+	 *            the col
+	 * @return the arg vector
+	 */
+	public ArgVector withValue(int extraValue, int col) {
 
-    ArgVector withValue = new ArgVector(argSet, args);
+		ArgVector withValue = new ArgVector(argSet, args);
 
-    withValue.args[col] = extraValue;
-    return withValue;
-  }
+		withValue.args[col] = extraValue;
+		return withValue;
+	}
 
-  private Object[] fillIn() {
+	private Object[] fillIn() {
 
-    Object[] ret = new Object[args.length];
+		Object[] ret = new Object[args.length];
 
-    for (int i = 0; i < args.length; i++) {
-      if (args[i] >= 0) {
-        ret[i] = argSet.argsValues.get(i).get(args[i]);
-      }
-    }
-    return ret;
-  }
+		for (int i = 0; i < args.length; i++) {
+			if (args[i] >= 0) {
+				ret[i] = argSet.argsValues.get(i).get(args[i]);
+			}
+		}
+		return ret;
+	}
 
-  @Override
-  public String toString() {
-    return Arrays.toString(args);
-  }
+	@Override
+	public String toString() {
+		return Arrays.toString(args);
+	}
 
 }

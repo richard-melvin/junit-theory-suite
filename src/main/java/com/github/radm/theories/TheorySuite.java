@@ -38,7 +38,6 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TheorySuite.class);
 
-
 	/**
 	 * currently reuses some of the implementation of the default theories
 	 * runner.
@@ -294,8 +293,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 		}
 	}
 
-	private void recordCases(Description methodDescription,
-			Collection<MethodWithArguments> methodCases) {
+	private void recordCases(Description methodDescription, Collection<MethodWithArguments> methodCases) {
 		allMethodsWithAllArgs.addAll(methodCases);
 
 		for (MethodWithArguments testCase : methodCases) {

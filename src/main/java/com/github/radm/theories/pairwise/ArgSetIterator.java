@@ -31,7 +31,6 @@ public abstract class ArgSetIterator implements Iterator<ArgVector> {
 
 		nextValue = computeNext();
 
-
 		return !knownComplete;
 	}
 

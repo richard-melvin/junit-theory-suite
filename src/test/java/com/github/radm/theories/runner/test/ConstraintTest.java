@@ -19,168 +19,192 @@ import com.github.radm.theories.Constraint;
  * test the @Constraint annotation
  *
  */
-@SuppressWarnings("javadoc")
 public class ConstraintTest extends CustomRunnerTest {
 
-  public abstract static class SimpleConstraints {
+	public abstract static class SimpleConstraints {
 
-    @DataPoints
-    public static int[] l1 = IntStream.range(0, 5).toArray();
+		@DataPoints
+		public static int[] l1 = IntStream.range(0, 5).toArray();
 
-    @DataPoints
-    public static double[] d1 = DoubleStream.of(0, 1, 2).toArray();
+		@DataPoints
+		public static double[] d1 = DoubleStream.of(0, 1, 2).toArray();
 
-    @Constraint
-    public static boolean booleansTrue(boolean b) {
-      return b;
-    }
+		@Constraint
+		public static boolean booleansTrue(boolean b) {
+			return b;
+		}
 
-    @Constraint
-    public static boolean doublesInOrder(double a, double b) {
-      return a <= b;
-    }
-  }
+		@Constraint
+		public static boolean doublesInOrder(double a, double b) {
+			return a <= b;
+		}
+	}
 
-  public static class OneArgument extends SimpleConstraints {
+	public static class OneArgument extends SimpleConstraints {
 
-    @Theory
-    public void oneArg(boolean b) {
-      assertTrue(b);
-    }
-  }
+		@Theory
+		public void oneArg(boolean b) {
+			assertTrue(b);
+		}
+	}
 
-  @Test
-  public void simpleOneArgConstraint() throws Exception {
+	@Test
+	public void simpleOneArgConstraint() throws Exception {
 
-    RunListener listener = runTestWithMockListener(OneArgument.class);
+		RunListener listener = runTestWithMockListener(OneArgument.class);
 
-    alwaysPassesWithCases(listener, 1);
+		alwaysPassesWithCases(listener, 1);
 
-  }
+	}
 
-  public static class TwoArguments extends SimpleConstraints {
+	public static class TwoArguments extends SimpleConstraints {
 
-    @Theory
-    public void twoArgs(boolean b1, boolean b2) {
-      assertTrue(b1);
-      assertTrue(b2);
-    }
-  }
+		@Theory
+		public void twoArgs(boolean b1, boolean b2) {
+			assertTrue(b1);
+			assertTrue(b2);
+		}
+	}
 
-  @Test
-  public void simpleConstraintWithTwoArgs() throws Exception {
+	@Test
+	public void simpleConstraintWithTwoArgs() throws Exception {
 
-    RunListener listener = runTestWithMockListener(TwoArguments.class);
+		RunListener listener = runTestWithMockListener(TwoArguments.class);
 
-    alwaysPassesWithCases(listener, 1);
+		alwaysPassesWithCases(listener, 1);
 
-  }
+	}
 
-   @SuppressWarnings("unused")
+	public static class ExcessArguments extends SimpleConstraints {
 
-  public static class ExcessArguments extends SimpleConstraints {
+		@Theory
+		public void manyArgs(int i1, boolean b1, int i2, boolean b2, int i3) {
+			assertTrue(b1);
+			assertTrue(b2);
+		}
 
-    @Theory
-    public void manyArgs(int i1, boolean b1, int i2, boolean b2, int i3) {
-      assertTrue(b1);
-      assertTrue(b2);
-    }
+	}
 
-  }
+	@Test
+	public void simpleConstraintWithExtraArgs() throws Exception {
 
-  @Test
-  public void simpleConstraintWithExtraArgs() throws Exception {
+		RunListener listener = runTestWithMockListener(ExcessArguments.class);
 
-    RunListener listener = runTestWithMockListener(ExcessArguments.class);
+		alwaysPassesWithCases(listener, 125);
 
-    alwaysPassesWithCases(listener, 125);
+	}
 
-  }
+	public static class OnePair extends SimpleConstraints {
 
-  public static class OnePair extends SimpleConstraints {
+		@Theory
+		public void inOrder(double a, double b) {
+			assertTrue(a <= b);
+		}
 
-    @Theory
-    public void inOrder(double a, double b) {
-      assertTrue(a <= b);
-    }
+	}
 
-  }
+	@Test
+	public void onePairConstraint() throws Exception {
 
-  @Test
-  public void onePairConstraint() throws Exception {
+		RunListener listener = runTestWithMockListener(OnePair.class);
 
-    RunListener listener = runTestWithMockListener(OnePair.class);
+		alwaysPassesWithCases(listener, 6);
 
-    alwaysPassesWithCases(listener, 6);
+	}
 
-  }
+	public static class TwoPairs extends SimpleConstraints {
 
-  public static class TwoPairs extends SimpleConstraints {
+		@Theory
+		public void inOrder(double a, double b, double c) {
+			assertTrue(a <= b);
+			assertTrue(b <= c);
 
-    @Theory
-    public void inOrder(double a, double b, double c) {
-      assertTrue(a <= b);
-      assertTrue(b <= c);
+		}
 
-    }
+	}
 
-  }
+	@Test
+	public void twoPairsConstraint() throws Exception {
 
-  @Test
-  public void twoPairsConstraint() throws Exception {
+		RunListener listener = runTestWithMockListener(TwoPairs.class);
 
-    RunListener listener = runTestWithMockListener(TwoPairs.class);
+		alwaysPassesWithCases(listener, 10);
 
-    alwaysPassesWithCases(listener, 10);
+	}
 
-  }
+	public static class TwoPairsWithExtraArguments extends SimpleConstraints {
 
-  @SuppressWarnings("unused")
-  public static class TwoPairsWithExtraArguments extends SimpleConstraints {
+		@Theory
+		public void inOrder(boolean b1, double a, double b, double c, int i) {
+			assertTrue(a <= b);
+			assertTrue(b <= c);
 
-    @Theory
-    public void inOrder(boolean b1, double a, double b, double c, int i) {
-      assertTrue(a <= b);
-      assertTrue(b <= c);
+			assertTrue(b1);
+		}
 
-      assertTrue(b1);
-    }
+	}
 
-  }
+	@Test
+	public void twoPairsExtarArgsConstraint() throws Exception {
 
-  @Test
-  public void twoPairsExtarArgsConstraint() throws Exception {
+		RunListener listener = runTestWithMockListener(TwoPairsWithExtraArguments.class);
 
-    RunListener listener = runTestWithMockListener(TwoPairsWithExtraArguments.class);
+		alwaysPassesWithCases(listener, 10 * 5);
 
-    alwaysPassesWithCases(listener, 10 * 5);
+	}
 
-  }
+	public static class InvalidConstraint {
 
-  public static class InvalidConstraint {
+		@Constraint
+		private int badConstraint() {
+			return 0;
+		}
 
-    @Constraint
-    private int badConstraint() {
-      return 0;
-    }
+		@Theory
+		public void oneArg(boolean b) {
+			assertTrue(b);
+		}
+	}
 
-    @Theory
-    public void oneArg(boolean b) {
-      assertTrue(b);
-    }
-  }
+	@Test
+	public void invalidConstraint() throws Exception {
 
-  @Test
-  public void invalidConstraint() throws Exception {
+		Result result = JUnitCore.runClasses(runSelect, InvalidConstraint.class);
 
-        Result result = JUnitCore.runClasses(runSelect, InvalidConstraint.class);
+		result.getFailures()
+				.forEach(f -> assertTrue(f.toString(), f.toString().contains("Constraint method badConstraint")));
 
-        result.getFailures().forEach(f -> assertTrue(f.toString(), f.toString().contains("Constraint method badConstraint")));
+		assertEquals(4, result.getRunCount());
+		assertEquals(4, result.getFailureCount());
+		assertEquals(0, result.getIgnoreCount());
 
-        assertEquals(4, result.getRunCount());
-        assertEquals(4, result.getFailureCount());
-        assertEquals(0, result.getIgnoreCount());
+	}
 
-  }
+	public static class Issue5Regression {
+		@Constraint
+		public static boolean isGreaterThan(Number n1, Number n2) {
+			return n1.doubleValue() > n2.doubleValue();
+		}
+
+		@Theory
+		public void greaterThan(Integer i1, Integer i2) {
+			assertTrue(isGreaterThan(i1, i2));
+		}
+
+		@DataPoints
+		public static int[] l1 = IntStream.range(0, 5).toArray();
+	}
+
+
+	@Test
+	public void constraintOnBaseClass() throws Exception {
+
+		RunListener listener = runTestWithMockListener(Issue5Regression.class);
+
+		alwaysPassesWithCases(listener, 4 + 3 + 2 + 1);
+
+
+	}
+
 
 }

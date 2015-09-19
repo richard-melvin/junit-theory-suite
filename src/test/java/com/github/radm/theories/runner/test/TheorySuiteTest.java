@@ -1,7 +1,10 @@
 package com.github.radm.theories.runner.test;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,368 +26,355 @@ import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
+import org.mockito.Mockito;
 
 /**
- * unit test for TheorySuite.
- * Covers more details than the ExampleTest
+ * unit test for TheorySuite. Covers more details than the ExampleTest
  *
  */
-@SuppressWarnings("javadoc")
 public class TheorySuiteTest extends CustomRunnerTest {
 
-  public static class ValidTest {
-    @Test
-    public void simplePassingTest() {
-      assertTrue(true);
-    }
+	public static class ValidTest {
+		@Test
+		public void simplePassingTest() {
+			assertTrue(true);
+		}
 
-    @Theory
-    public void simpleFailingTheory(boolean value) {
-      assertTrue(value);
-    }
-  }
+		@Theory
+		public void simpleFailingTheory(boolean value) {
+			assertTrue(value);
+		}
+	}
 
-  @Test
-  public void simpleValidTestResult()  {
+	@Test
+	public void simpleValidTestResult() {
 
-        Result result = JUnitCore.runClasses(runSelect, ValidTest.class);
-        assertEquals(3, result.getRunCount());
-        assertEquals(1, result.getFailureCount());
-        assertEquals(0, result.getIgnoreCount());
+		Result result = JUnitCore.runClasses(runSelect, ValidTest.class);
+		assertEquals(3, result.getRunCount());
+		assertEquals(1, result.getFailureCount());
+		assertEquals(0, result.getIgnoreCount());
 
-        Failure failure = result.getFailures().get(0);
-    assertTrue(failure.getException() instanceof AssertionError);
+		Failure failure = result.getFailures().get(0);
+		assertTrue(failure.getException() instanceof AssertionError);
 
-    assertTrue(failure.getDescription().getDisplayName().startsWith("simpleFailingTheory[false]"));
+		assertTrue(failure.getDescription().getDisplayName().startsWith("simpleFailingTheory[false]"));
 
-  }
+	}
 
+	@Test
+	public void simpleValidTestMocked() throws Exception {
 
-  @Test
-  public void simpleValidTestMocked() throws Exception  {
+		RunListener listener = runTestWithMockListener(ValidTest.class);
 
-    RunListener listener = runTestWithMockListener(ValidTest.class);
+		ArgumentCaptor<Description> argument = ArgumentCaptor.forClass(Description.class);
 
-    ArgumentCaptor<Description> argument = ArgumentCaptor.forClass(Description.class);
+		verify(listener, times(1)).testRunStarted(Mockito.any());
+		verify(listener, times(3)).testStarted(argument.capture());
+		verify(listener, times(3)).testFinished(Mockito.any());
+		verify(listener, times(0)).testAssumptionFailure(Mockito.any());
+		verify(listener, times(1)).testFailure(Mockito.any());
 
-        verify(listener, times(1)).testRunStarted(Matchers.any());
-        verify(listener, times(3)).testStarted(argument.capture());
-        verify(listener, times(3)).testFinished(Matchers.any());
-        verify(listener, times(0)).testAssumptionFailure(Matchers.any());
-        verify(listener, times(1)).testFailure(Matchers.any());
+		for (Description d : argument.getAllValues()) {
+			assertTrue(d.getTestClass().equals(ValidTest.class));
+			assertTrue(d.getChildren().isEmpty());
 
+		}
 
-        for (Description d : argument.getAllValues())
-        {
-          assertTrue(d.getTestClass().equals(ValidTest.class));
-          assertTrue(d.getChildren().isEmpty());
+	}
 
-        }
+	@Test
+	public void simpleValidTestFilteredTestMethod() throws Exception {
 
-  }
+		RunListener listener = runTestCaseWithMockListener(ValidTest.class,
+				Description.createTestDescription(ValidTest.class, "simplePassingTest"));
 
-  @Test
-  public void simpleValidTestFilteredTestMethod() throws Exception  {
+		ArgumentCaptor<Description> argument = ArgumentCaptor.forClass(Description.class);
 
-    RunListener listener = runTestCaseWithMockListener(ValidTest.class,
-        Description.createTestDescription(ValidTest.class, "simplePassingTest"));
+		verify(listener, times(1)).testRunStarted(Mockito.any());
+		verify(listener, times(1)).testStarted(argument.capture());
+		verify(listener, times(1)).testFinished(Mockito.any());
+		verify(listener, times(0)).testAssumptionFailure(Mockito.any());
+		verify(listener, times(0)).testFailure(Mockito.any());
 
-    ArgumentCaptor<Description> argument = ArgumentCaptor.forClass(Description.class);
+		assertEquals("simplePassingTest", argument.getValue().getMethodName());
+		assertEquals(ValidTest.class, argument.getValue().getTestClass());
+		assertEquals(0, argument.getValue().getChildren().size());
 
-        verify(listener, times(1)).testRunStarted(Matchers.any());
-        verify(listener, times(1)).testStarted(argument.capture());
-        verify(listener, times(1)).testFinished(Matchers.any());
-        verify(listener, times(0)).testAssumptionFailure(Matchers.any());
-        verify(listener, times(0)).testFailure(Matchers.any());
+	}
 
+	@Test
+	public void simpleValidTestFilteredTheory() throws Exception {
 
-        assertEquals("simplePassingTest", argument.getValue().getMethodName());
-        assertEquals(ValidTest.class, argument.getValue().getTestClass());
-        assertEquals(0, argument.getValue().getChildren().size());
+		RunListener listener = runTestCaseWithMockListener(ValidTest.class,
+				Description.createTestDescription(ValidTest.class, "simpleFailingTheory[true]"));
 
-  }
+		ArgumentCaptor<Description> argument = ArgumentCaptor.forClass(Description.class);
 
-  @Test
-  public void simpleValidTestFilteredTheory() throws Exception  {
+		verify(listener, times(1)).testRunStarted(Mockito.any());
+		verify(listener, times(1)).testStarted(argument.capture());
+		verify(listener, times(1)).testFinished(Mockito.any());
+		verify(listener, times(0)).testAssumptionFailure(Mockito.any());
+		verify(listener, times(0)).testFailure(Mockito.any());
 
-    RunListener listener = runTestCaseWithMockListener(ValidTest.class,
-        Description.createTestDescription(ValidTest.class, "simpleFailingTheory[true]"));
+		assertEquals("simpleFailingTheory[true]", argument.getValue().getMethodName());
+		assertEquals(ValidTest.class, argument.getValue().getTestClass());
+		assertEquals(0, argument.getValue().getChildren().size());
 
-    ArgumentCaptor<Description> argument = ArgumentCaptor.forClass(Description.class);
+	}
 
-        verify(listener, times(1)).testRunStarted(Matchers.any());
-        verify(listener, times(1)).testStarted(argument.capture());
-        verify(listener, times(1)).testFinished(Matchers.any());
-        verify(listener, times(0)).testAssumptionFailure(Matchers.any());
-        verify(listener, times(0)).testFailure(Matchers.any());
+	public static class BeforeAndAfter {
 
+		private boolean ok = false;
 
-        assertEquals("simpleFailingTheory[true]", argument.getValue().getMethodName());
-        assertEquals(ValidTest.class, argument.getValue().getTestClass());
-        assertEquals(0, argument.getValue().getChildren().size());
+		@Before
+		public void flagAsOk() {
+			ok = true;
+		}
 
-  }
+		@After
+		public void flagAsNotOk() {
+			ok = false;
+		}
+
+		@Test
+		public void passIfOk() {
+			assertTrue(ok);
+		}
+
+	}
+
+	@Test
+	public void beforeAndAfter() {
+		Result result = JUnitCore.runClasses(runSelect, BeforeAndAfter.class);
+		assertEquals(1, result.getRunCount());
+		assertEquals(0, result.getFailureCount());
+		assertEquals(0, result.getIgnoreCount());
+	}
+
+	public abstract static class InvalidTheory {
+		@Theory
+		private int invalidTest() {
+			return -1;
+		}
+
+	}
+
+	@Test
+	public void checksForInvalidTheory() {
+		Result result = JUnitCore.runClasses(runSelect, InvalidTheory.class);
+		assertEquals(2, result.getRunCount());
+		assertEquals(2, result.getFailureCount());
+		assertEquals(0, result.getIgnoreCount());
+
+		result.getFailures()
+				.forEach(f -> assertTrue(f.toString(), f.toString().contains("Method invalidTest() should be")));
+	}
+
+	public static class FailAssumptionOrPass {
+		@Theory
+		public void booleanTheory(boolean value) {
+			Assume.assumeTrue(value);
+			assertTrue(value);
+		}
+	}
+
+	@Test
+	public void casesFailingAssumptionsAreCountedAsPasssed() throws Exception {
+
+		RunListener listener = runTestWithMockListener(FailAssumptionOrPass.class);
+
+		verify(listener, times(1)).testRunStarted(Mockito.any());
+		verify(listener, times(2)).testStarted(Mockito.any());
+		verify(listener, times(2)).testFinished(Mockito.any());
+		verify(listener, times(1)).testAssumptionFailure(Mockito.any());
+		verify(listener, never()).testFailure(Mockito.any());
+
+	}
+
+	public static class AssumptionAlwaysFails {
+		@Theory
+		public void booleanTheory(boolean value) {
+			Assume.assumeTrue(value);
+			Assume.assumeFalse(value);
+		}
+	}
+
+	@Test
+	public void failsWhenNoCasesSatisfyingAssumptions() throws Exception {
+
+		RunListener listener = runTestWithMockListener(AssumptionAlwaysFails.class);
+
+		verify(listener, times(2)).testStarted(Mockito.any());
+		verify(listener, times(2)).testFinished(Mockito.any());
+		verify(listener, times(2)).testAssumptionFailure(Mockito.any());
+		verify(listener, times(1)).testFailure(Mockito.any());
+
+	}
 
+	public static class IgnoredTests {
+		@Theory
+		@Ignore
+		public void booleanTheory(boolean value) {
+			assertTrue(value);
+		}
+
+		@Test
+		@Ignore
+		public void ignored() {
+			Assert.fail();
+		}
+	}
+
+	@Test
+	public void ignoredTestsIgnored() throws Exception {
+
+		RunListener listener = runTestWithMockListener(IgnoredTests.class);
+
+		verify(listener, times(0)).testStarted(Mockito.any());
+		verify(listener, times(0)).testFinished(Mockito.any());
+		verify(listener, times(0)).testAssumptionFailure(Mockito.any());
+		verify(listener, times(0)).testFailure(Mockito.any());
 
+	}
 
+	public static class MissingDatapoints {
+		@Theory
+		public void intTheory(int value) {
+			assertTrue(value > 0);
+		}
 
-  public static class BeforeAndAfter {
+		@Test
+		public void passing() {
+		}
+	}
 
-    private boolean ok = false;
-    @Before
-    public void flagAsOk()
-    {
-      ok = true;
-    }
-
-    @After
-    public void flagAsNotOk()
-    {
-      ok = false;
-    }
-
-    @Test
-    public void passIfOk() {
-      assertTrue(ok);
-    }
-
-  }
-
-  @Test
-  public void beforeAndAfter()  {
-        Result result = JUnitCore.runClasses(runSelect, BeforeAndAfter.class);
-        assertEquals(1, result.getRunCount());
-        assertEquals(0, result.getFailureCount());
-        assertEquals(0, result.getIgnoreCount());
-  }
-
-  public abstract static class InvalidTheory {
-    @Theory
-    private int invalidTest() {
-      return -1;
-    }
-
-  }
-
-  @Test
-  public void checksForInvalidTheory()  {
-        Result result = JUnitCore.runClasses(runSelect, InvalidTheory.class);
-        assertEquals(2, result.getRunCount());
-        assertEquals(2, result.getFailureCount());
-        assertEquals(0, result.getIgnoreCount());
-
-        result.getFailures().forEach(f -> assertTrue(f.toString(), f.toString().contains("Method invalidTest() should be")));
-  }
-
-
-  public static class FailAssumptionOrPass {
-    @Theory
-    public void booleanTheory(boolean value) {
-      Assume.assumeTrue(value);
-      assertTrue(value);
-    }
-  }
+	@Test
+	public void missingDataPointsFailsTest() throws Exception {
 
-  @Test
-  public void casesFailingAssumptionsAreCountedAsPasssed() throws Exception  {
-
-    RunListener listener = runTestWithMockListener(FailAssumptionOrPass.class);
-
-        verify(listener, times(1)).testRunStarted(Matchers.any());
-        verify(listener, times(2)).testStarted(Matchers.any());
-        verify(listener, times(2)).testFinished(Matchers.any());
-        verify(listener, times(1)).testAssumptionFailure(Matchers.any());
-        verify(listener, never()).testFailure(Matchers.any());
+		RunListener listener = runTestWithMockListener(MissingDatapoints.class);
 
-  }
+		verify(listener, times(1)).testStarted(Mockito.any());
+		verify(listener, times(1)).testFinished(Mockito.any());
+		verify(listener, times(0)).testAssumptionFailure(Mockito.any());
+		verify(listener, times(1)).testFailure(Mockito.any());
 
-  public static class AssumptionAlwaysFails {
-    @Theory
-    public void booleanTheory(boolean value) {
-      Assume.assumeTrue(value);
-      Assume.assumeFalse(value);
-    }
-  }
+	}
 
-  @Test
-  public void failsWhenNoCasesSatisfyingAssumptions() throws Exception  {
+	public static class GenericsTest {
 
-    RunListener listener = runTestWithMockListener(AssumptionAlwaysFails.class);
+		@DataPoints
+		public static List<Integer> l1 = IntStream.range(0, 23).boxed().collect(Collectors.toList());
+		@DataPoints
+		public static List<Long> l2 = LongStream.range(900, 923).boxed().collect(Collectors.toList());
 
-        verify(listener, times(2)).testStarted(Matchers.any());
-        verify(listener, times(2)).testFinished(Matchers.any());
-        verify(listener, times(2)).testAssumptionFailure(Matchers.any());
-        verify(listener, times(1)).testFailure(Matchers.any());
+		@Theory
+		public void checkGenerics(int i, long l) {
+			assertTrue(l > i);
+		}
+	}
 
-  }
+	@Test
+	public void canIdentifyArgsByGenericType() throws Exception {
 
-  public static class IgnoredTests {
-    @Theory
-    @Ignore
-    public void booleanTheory(boolean value) {
-      assertTrue(value);
-    }
-    @Test
-    @Ignore
-    public void ignored() {
-      Assert.fail();
-    }
-  }
+		RunListener listener = runTestWithMockListener(GenericsTest.class);
 
-  @Test
-  public void ignoredTestsIgnored() throws Exception  {
+		verify(listener, times(23 * 23)).testStarted(Mockito.any());
+		verify(listener, times(23 * 23)).testFinished(Mockito.any());
+		verify(listener, times(0)).testAssumptionFailure(Mockito.any());
+		verify(listener, times(0)).testFailure(Mockito.any());
 
-    RunListener listener = runTestWithMockListener(IgnoredTests.class);
+	}
 
-        verify(listener, times(0)).testStarted(Matchers.any());
-        verify(listener, times(0)).testFinished(Matchers.any());
-        verify(listener, times(0)).testAssumptionFailure(Matchers.any());
-        verify(listener, times(0)).testFailure(Matchers.any());
+	public static class NamedDataTest {
 
-  }
+		@DataPoints("l1")
+		public static List<Integer> l1 = IntStream.range(0, 25).boxed().collect(Collectors.toList());
+		@DataPoints("l2")
+		public static List<Integer> l2 = IntStream.range(400, 430).boxed().collect(Collectors.toList());
 
+		@Theory
+		public void checkGenerics(@FromDataPoints("l1") int i, @FromDataPoints("l2") int l) {
+			assertTrue(l > i);
+		}
+	}
 
+	@Test
+	public void canIdentifyArgsByName() throws Exception {
 
-  public static class MissingDatapoints {
-    @Theory
-    public void intTheory(int value) {
-      assertTrue(value > 0);
-    }
-    @Test
-    public void passing() {
-    }
-  }
+		RunListener listener = runTestWithMockListener(NamedDataTest.class);
 
-  @Test
-  public void missingDataPointsFailsTest() throws Exception  {
+		verify(listener, times(25 * 30)).testStarted(Mockito.any());
+		verify(listener, times(25 * 30)).testFinished(Mockito.any());
+		verify(listener, times(0)).testAssumptionFailure(Mockito.any());
+		verify(listener, times(0)).testFailure(Mockito.any());
 
-    RunListener listener = runTestWithMockListener(MissingDatapoints.class);
+	}
 
-        verify(listener, times(1)).testStarted(Matchers.any());
-        verify(listener, times(1)).testFinished(Matchers.any());
-        verify(listener, times(0)).testAssumptionFailure(Matchers.any());
-        verify(listener, times(1)).testFailure(Matchers.any());
+	public static class DatapointFunctionThrows {
+		@Test
+		public void passing() {
+		}
 
-  }
+		@Theory
+		public void intTheory(int value) {
+			assertTrue(value > 0);
+		}
 
+		@DataPoints
+		public static List<Integer> lf1() {
+			throw new NumberFormatException();
+		}
 
-  public static class GenericsTest {
+	}
 
-    @DataPoints public static List<Integer> l1 = IntStream.range(0, 23).boxed().collect(Collectors.toList());
-    @DataPoints public static List<Long> l2 = LongStream.range(900, 923).boxed().collect(Collectors.toList());
+	@Test
+	public void datapointFunctionThrowsException() throws Exception {
 
-    @Theory
-    public void checkGenerics(int i, long l) {
-      assertTrue(l > i);
-    }
-  }
+		RunListener listener = runTestWithMockListener(DatapointFunctionThrows.class);
 
-  @Test
-  public void canIdentifyArgsByGenericType() throws Exception  {
+		ArgumentCaptor<Failure> argument = ArgumentCaptor.forClass(Failure.class);
 
-    RunListener listener = runTestWithMockListener(GenericsTest.class);
+		verify(listener, times(1)).testFailure(argument.capture());
 
-        verify(listener, times(23 * 23)).testStarted(Matchers.any());
-        verify(listener, times(23 * 23)).testFinished(Matchers.any());
-        verify(listener, times(0)).testAssumptionFailure(Matchers.any());
-        verify(listener, times(0)).testFailure(Matchers.any());
+		assertTrue(argument.getValue().toString(), argument.getValue().getException() instanceof NumberFormatException);
+	}
 
-  }
+	public static class LargeNumberOfArgs {
 
+		@DataPoints
+		public static int[] l1 = IntStream.range(0, 5).toArray();
 
-  public static class NamedDataTest {
+		@Theory
+		public void sixArgsTheory(int i, boolean a, boolean b, boolean c, boolean d, int j) {
+		}
+	}
 
-    @DataPoints("l1") public static List<Integer> l1 = IntStream.range(0, 25).boxed().collect(Collectors.toList());
-    @DataPoints("l2") public static List<Integer> l2 = IntStream.range(400, 430).boxed().collect(Collectors.toList());
+	@Test
+	public void largeExhaustiveSearch() throws Exception {
 
-    @Theory
-    public void checkGenerics(@FromDataPoints("l1") int i, @FromDataPoints("l2") int l) {
-      assertTrue(l > i);
-    }
-  }
+		RunListener listener = runTestWithMockListener(LargeNumberOfArgs.class);
 
-  @Test
-  public void canIdentifyArgsByName() throws Exception  {
+		alwaysPassesWithCases(listener, 5 * 5 * 2 * 2 * 2 * 2);
 
-    RunListener listener = runTestWithMockListener(NamedDataTest.class);
+	}
 
-        verify(listener, times(25 * 30)).testStarted(Matchers.any());
-        verify(listener, times(25 * 30)).testFinished(Matchers.any());
-        verify(listener, times(0)).testAssumptionFailure(Matchers.any());
-        verify(listener, times(0)).testFailure(Matchers.any());
+	public static class StringArgs {
 
-  }
+		@DataPoints
+		public static String[] l1 = { "hello", "(/)" };
 
+		@Theory
+		public void stringArgsTheory(String s1, String s2, String s3) {
+		}
+	}
 
-  public static class DatapointFunctionThrows {
-    @Test
-    public void passing() {
-    }
+	@Test
+	public void stringArgs() throws Exception  {
 
-    @Theory
-    public void intTheory(int value) {
-      assertTrue(value > 0);
-    }
-    @DataPoints public static List<Integer> lf1() {
-      throw new NumberFormatException();
-    }
+		RunListener listener = runTestWithMockListener(StringArgs.class);
 
-  }
+		alwaysPassesWithCases(listener, 2 * 2 * 2);
 
-  @Test
-  public void datapointFunctionThrowsException() throws Exception  {
-
-    RunListener listener = runTestWithMockListener(DatapointFunctionThrows.class);
-
-    ArgumentCaptor<Failure> argument = ArgumentCaptor.forClass(Failure.class);
-
-        verify(listener, times(1)).testFailure(argument.capture());
-
-        assertTrue(argument.getValue().toString(), argument.getValue().getException() instanceof NumberFormatException);
-  }
-
-
-
-  @SuppressWarnings("unused")
-  public static class LargeNumberOfArgs {
-
-    @DataPoints public static int[] l1 = IntStream.range(0, 5).toArray();
-
-    @Theory
-    public void sixArgsTheory(int i, boolean a, boolean b, boolean c, boolean d, int j) {
-    }
-  }
-
-  @Test
-  public void largeExhaustiveSearch() throws Exception  {
-
-    RunListener listener = runTestWithMockListener(LargeNumberOfArgs.class);
-
-    alwaysPassesWithCases(listener, 5 * 5 * 2 * 2 * 2 * 2);
-
-  }
-
-
-
-  @SuppressWarnings("unused")
-  public static class StringArgs {
-
-    @DataPoints public static String[] l1 = {"hello", "(/)"};
-
-    @Theory
-    public void stringArgsTheory(String s1, String s2, String s3) {
-    }
-  }
-
-  @Test
-  public void stringArgs() throws Exception  {
-
-    RunListener listener = runTestWithMockListener(StringArgs.class);
-
-    alwaysPassesWithCases(listener, 2 * 2 * 2);
-
-  }
-
+	}
 
 }

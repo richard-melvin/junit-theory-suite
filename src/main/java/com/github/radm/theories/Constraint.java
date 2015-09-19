@@ -27,13 +27,12 @@ import static java.lang.annotation.RetentionPolicy.*;
  */
 @Retention(RUNTIME)
 @Target(METHOD)
-public @interface Constraint
-{
+public @interface Constraint {
 
-  /**
-   *
-   * @return the explicit constraint name
-   */
-  String value() default "";
+	/**
+	 *
+	 * @return the explicit constraint name
+	 */
+	String value() default "";
 
 }

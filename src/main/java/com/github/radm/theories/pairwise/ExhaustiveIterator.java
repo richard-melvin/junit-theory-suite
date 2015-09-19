@@ -48,27 +48,23 @@ public class ExhaustiveIterator extends ArgSetIterator {
 		if (argIndex < args.argNames.size() - 1) {
 			return new ExhaustiveIterator(args, this);
 		}
-    return null;
+		return null;
 	}
-
 
 	@Override
 	protected ArgVector computeNext() {
-		if (predicate == null)
-		{
+		if (predicate == null) {
 			return computeNextSimple();
 		}
 		return computeNextPassingPredicate();
 	}
-
 
 	protected ArgVector computeNextPassingPredicate() {
 		ArgVector candidate = computeNextSimple();
 		boolean requiresReset = false;
 		while (!predicate.test(populateResult().getArgVals()) && !knownComplete) {
 			if (ArgumentSet.LOG.isTraceEnabled()) {
-				ArgumentSet.LOG.trace("Rejected {} by predicate on {}", populateResult(),
-						args.argNames.get(argIndex));
+				ArgumentSet.LOG.trace("Rejected {} by predicate on {}", populateResult(), args.argNames.get(argIndex));
 			}
 			if (valIter.hasNext()) {
 				currValue = valIter.next();

@@ -29,86 +29,82 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Work out the set of potential assignments for each argument on an individual basis.
- * Extracted from org.junit.contrib.theories.internal.Assignments, taking out the
- * fixed all-values generation logic.
+ * Work out the set of potential assignments for each argument on an individual
+ * basis. Extracted from org.junit.contrib.theories.internal.Assignments, taking
+ * out the fixed all-values generation logic.
  */
 public class PotentialAssignmentFinder {
 
-  private final TestClass testClass;
+	private final TestClass testClass;
 
-  private static final Logger LOG = LoggerFactory.getLogger(PotentialAssignmentFinder.class);
+	private static final Logger LOG = LoggerFactory.getLogger(PotentialAssignmentFinder.class);
 
-  /**
-   * Instantiates a new potential assignment finder.
-   *
-   * @param testClass the test class
-   */
-  public PotentialAssignmentFinder(TestClass testClass) {
-    super();
-    this.testClass = testClass;
-  }
+	/**
+	 * Instantiates a new potential assignment finder.
+	 *
+	 * @param testClass
+	 *            the test class
+	 */
+	public PotentialAssignmentFinder(TestClass testClass) {
+		super();
+		this.testClass = testClass;
+	}
 
-  /**
-   * List potential datapoints for a specified test method argument.
-   *
-   * @param unassigned the unassigned parameter
-   * @return the list
-   * @throws Throwable the throwable
-   */
-  public List<PotentialAssignment> potentialsFor(ParameterSignature unassigned)
-      throws Throwable {
-    List<PotentialAssignment> assignments = getSupplier(unassigned)
-        .getValueSources(unassigned);
+	/**
+	 * List potential datapoints for a specified test method argument.
+	 *
+	 * @param unassigned
+	 *            the unassigned parameter
+	 * @return the list
+	 * @throws Throwable
+	 *             the throwable
+	 */
+	public List<PotentialAssignment> potentialsFor(ParameterSignature unassigned) throws Throwable {
+		List<PotentialAssignment> assignments = getSupplier(unassigned).getValueSources(unassigned);
 
-    if (assignments.isEmpty()) {
-      assignments = generateAssignmentsFromTypeAlone(unassigned);
-    }
+		if (assignments.isEmpty()) {
+			assignments = generateAssignmentsFromTypeAlone(unassigned);
+		}
 
-    if (assignments.isEmpty()) {
-      LOG.warn("Unable to find any possible values for argument {}", unassigned.getName());
-    }
+		if (assignments.isEmpty()) {
+			LOG.warn("Unable to find any possible values for argument {}", unassigned.getName());
+		}
 
-    return assignments;
-  }
+		return assignments;
+	}
 
-  private List<PotentialAssignment> generateAssignmentsFromTypeAlone(
-      ParameterSignature unassigned) {
-    org.javaruntype.type.Type<?> paramType = forJavaLangReflectType(unassigned
-        .getType());
-    Class<?> klass = paramType.getRawClass();
+	private List<PotentialAssignment> generateAssignmentsFromTypeAlone(ParameterSignature unassigned) {
+		org.javaruntype.type.Type<?> paramType = forJavaLangReflectType(unassigned.getType());
+		Class<?> klass = paramType.getRawClass();
 
-    if (klass.isEnum()) {
-      return new EnumSupplier(klass).getValueSources(unassigned);
-    }
-    if (Boolean.class.equals(klass) || boolean.class.equals(klass)) {
-      return new BooleanSupplier().getValueSources(unassigned);
-    }
+		if (klass.isEnum()) {
+			return new EnumSupplier(klass).getValueSources(unassigned);
+		}
+		if (Boolean.class.equals(klass) || boolean.class.equals(klass)) {
+			return new BooleanSupplier().getValueSources(unassigned);
+		}
 
-    return emptyList();
-  }
+		return emptyList();
+	}
 
-  private ParameterSupplier getSupplier(ParameterSignature unassigned)
-      throws Exception {
-    ParametersSuppliedBy annotation = unassigned
-        .findDeepAnnotation(ParametersSuppliedBy.class);
+	private ParameterSupplier getSupplier(ParameterSignature unassigned) throws Exception {
+		ParametersSuppliedBy annotation = unassigned.findDeepAnnotation(ParametersSuppliedBy.class);
 
-    return annotation != null ? buildParameterSupplierFromClass(annotation
-        .value()) : new AllMembersSupplier(testClass);
-  }
+		return annotation != null ? buildParameterSupplierFromClass(annotation.value())
+				: new AllMembersSupplier(testClass);
+	}
 
-  private ParameterSupplier buildParameterSupplierFromClass(
-      Class<? extends ParameterSupplier> supplierClass) throws Exception {
+	private ParameterSupplier buildParameterSupplierFromClass(Class<? extends ParameterSupplier> supplierClass)
+			throws Exception {
 
-    for (Constructor<?> each : supplierClass.getConstructors()) {
-      Class<?>[] parameterTypes = each.getParameterTypes();
-      if (parameterTypes.length == 1
-          && TestClass.class.equals(parameterTypes[0])) {
-        return (ParameterSupplier) each.newInstance(testClass);
-      }
-    }
+		for (Constructor<?> each : supplierClass.getConstructors()) {
+			Class<?>[] parameterTypes = each.getParameterTypes();
+			if (parameterTypes.length == 1 && TestClass.class.equals(parameterTypes[0])) {
+				return (ParameterSupplier) each.newInstance(testClass);
+			}
+		}
 
-    return supplierClass.newInstance();
-  }
+		return supplierClass.newInstance();
+	}
 
 }

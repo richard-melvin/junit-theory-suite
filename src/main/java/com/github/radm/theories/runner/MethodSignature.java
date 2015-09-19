@@ -12,9 +12,7 @@
 package com.github.radm.theories.runner;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -27,134 +25,127 @@ import org.junit.runners.model.FrameworkMethod;
  */
 public class MethodSignature {
 
-  private final FrameworkMethod fm;
+	private final FrameworkMethod fm;
 
-  private static final Comparator<Parameter> TYPE_COMPARATOR = Comparator.comparing(p -> p.getType().getTypeName());
+	/**
+	 * Instantiates a new method signature.
+	 *
+	 * @param method the method
+	 */
+	public MethodSignature(FrameworkMethod method) {
+		super();
+		this.fm = method;
 
-  /**
-   * Instantiates a new method signature.
-   *
-   * @param method the method
-   */
-  public MethodSignature(FrameworkMethod method) {
-    super();
-    this.fm = method;
+	}
 
-  }
+	/**
+	 * Checks if this is a sub list of the other.
+	 *
+	 * @param other the other
+	 * @return true, if is sub list of
+	 */
+	public boolean isSubListOf(MethodSignature other) {
 
-  /**
-   * Checks if this is a sub list of the other.
-   *
-   * @param other the other
-   * @return true, if is sub list of
-   */
-  public boolean isSubListOf(MethodSignature other) {
+		int maxStart = other.getMethod().getParameterCount() - getMethod().getParameterCount();
 
-    int maxStart = other.getMethod().getParameterCount() - getMethod().getParameterCount();
+		for (int i = 0; i <= maxStart; i++) {
 
-    for (int i = 0; i <= maxStart; i++) {
+			if (isMatchFrom(other, i)) {
+				return true;
+			}
+		}
 
-      if (isMatchFrom(other, i)) {
-        return true;
-      }
-    }
+		return false;
+	}
 
-    return false;
-  }
+	private boolean isMatchFrom(MethodSignature other, int start) {
 
-  private boolean isMatchFrom(MethodSignature other, int start) {
+		for (int i = 0; i < getMethod().getParameterCount(); i++) {
+			if (!getMethod().getParameters()[i].getType().isAssignableFrom(other.getMethod().getParameters()[start + i].getType())) {
+				return false;
+			}
+		}
 
-    for (int i = 0; i < getMethod().getParameterCount(); i++) {
-      if (TYPE_COMPARATOR.compare(getMethod().getParameters()[i], other.getMethod().getParameters()[start + i]) != 0) {
-        return false;
-      }
-    }
+		return true;
+	}
 
-    return true;
-  }
+	/**
+	 * Build the set of possible argument mappings between this function and another.
+	 *
+	 * @param other the other
+	 * @return the list
+	 */
+	public List<Shim> buildShims(MethodSignature other) {
 
-  /**
-   * Build the set of possible argument mappings between this function and another.
-   *
-   * @param other the other
-   * @return the list
-   */
-  public List<Shim> buildShims(MethodSignature other) {
+		List<Shim> shims = new ArrayList<>();
+		int maxStart = other.getMethod().getParameterCount() - getMethod().getParameterCount();
 
-    List<Shim> shims = new ArrayList<>();
-    int maxStart = other.getMethod().getParameterCount() - getMethod().getParameterCount();
+		for (int i = 0; i <= maxStart; i++) {
 
-    for (int i = 0; i <= maxStart; i++) {
+			if (isMatchFrom(other, i)) {
+				int[] mapping = IntStream.range(i, i + getMethod().getParameterCount()).toArray();
 
-      if (isMatchFrom(other, i)) {
-        int[] mapping = IntStream.range(i, i + getMethod().getParameterCount()).toArray();
+				shims.add(new Shim(mapping));
+			}
+		}
 
-        shims.add(new Shim(mapping));
-      }
-    }
+		return shims;
+	}
 
-    return shims;
-  }
+	/**
+	 * Defines a mapping between the arguments of two functions, where one is a
+	 * subset of the other.
+	 */
+	public static class Shim implements Function<Object[], Object[]> {
 
-  /**
-   * Defines a mapping between the arguments of two functions, where one is a
-   * subset of the other.
-   */
-  public static class Shim implements Function<Object[], Object[]> {
+		final int[] argMapping;
 
-    final int[] argMapping;
+		public Shim(int[] argMapping) {
+			super();
+			this.argMapping = argMapping;
+		}
 
-    Shim(int[] argMapping) {
-      super();
-      this.argMapping = argMapping;
-    }
+		@Override
+		public Object[] apply(Object[] input) {
 
-    @Override
-    public Object[] apply(Object[] input) {
+			Object[] mapped = new Object[argMapping.length];
 
-      Object[] mapped = new Object[argMapping.length];
+			for (int i = 0; i < mapped.length; i++) {
+				assert input.length >= argMapping[i];
+				mapped[i] = input[argMapping[i]];
+			}
 
-      for (int i = 0; i < mapped.length; i++) {
-        assert input.length >= argMapping[i];
-        mapped[i] = input[argMapping[i]];
-      }
-
-      return mapped;
-    }
+			return mapped;
+		}
 
 
-    /**
-     * Last argument that needs to be known to call this function.
-     *
-     * @return the -0based argument index
-     */
-    public int lastMappedArgIndex()
-    {
-      int lastMapped = -1;
+		/**
+		 * Last argument that needs to be known to call this function.
+		 *
+		 * @return the -0based argument index
+		 */
+		public int lastMappedArgIndex()
+		{
+			int lastMapped = -1;
 
-      for (int arg : argMapping)
-      {
-        if (arg > lastMapped)
-        {
-          lastMapped = arg;
-        }
-      }
+			for (int arg : argMapping)
+			{
+				if (arg > lastMapped)
+				{
+					lastMapped = arg;
+				}
+			}
 
-      return lastMapped;
-    }
-  }
+			return lastMapped;
+		}
+	}
 
-  /**
-   * Gets the framework method.
-   *
-   * @return the framework method
-   */
-  public FrameworkMethod getFrameworkMethod() {
-    return fm;
-  }
+	public FrameworkMethod getFrameworkMethod() {
+		return fm;
+	}
 
-  private Method getMethod() {
-    return fm.getMethod();
-  }
+	private Method getMethod() {
+		return fm.getMethod();
+	}
 
 }

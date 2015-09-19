@@ -12,13 +12,12 @@ import static java.lang.annotation.RetentionPolicy.*;
  */
 @Retention(RUNTIME)
 @Target(METHOD)
-public @interface WithConstraints
-{
+public @interface WithConstraints {
 
-  /**
-   *
-   * @return the exlicit set of constraint names to use
-   */
-  String[]value();
+	/**
+	 *
+	 * @return the exlicit set of constraint names to use
+	 */
+	String[]value();
 
 }
