@@ -377,4 +377,22 @@ public class TheorySuiteTest extends CustomRunnerTest {
 
     }
 
+
+    public static class TheoryWithNoArguments {
+        @Theory
+        public void hasNoArguments() {
+        }
+
+    }
+
+    @Test
+    public void runTheoryWithNoArgumentsLikeTest() throws Exception {
+      RunListener listener = runTestWithMockListener(TheoryWithNoArguments.class);
+
+      alwaysPassesWithCases(listener, 1);
+
+
+    }
+
+
 }

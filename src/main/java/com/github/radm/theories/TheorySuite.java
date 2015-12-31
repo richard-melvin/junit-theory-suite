@@ -174,7 +174,7 @@ public class TheorySuite extends BlockJUnit4ClassRunner {
 
         for (FrameworkMethod fm : runner.computeTestMethods()) {
 
-            if (fm.getAnnotation(Theory.class) == null) {
+            if (fm.getAnnotation(Theory.class) == null ) {
                 recordNonTheoryCase(fm);
             } else {
                 recordTheoryCase(runner, fm);

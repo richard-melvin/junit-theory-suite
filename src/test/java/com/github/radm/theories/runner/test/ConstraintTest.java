@@ -78,7 +78,7 @@ public class ConstraintTest extends CustomRunnerTest {
     public static class ExcessArguments extends SimpleConstraints {
 
         @Theory
-        public void manyArgs(int i1, boolean b1, int i2, boolean b2, int i3) {
+        public void manyArgs( int i1, boolean b1, int i2, boolean b2, int i3) {
             assertTrue(b1);
             assertTrue(b2);
         }

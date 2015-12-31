@@ -14,30 +14,36 @@ import com.pholser.junit.quickcheck.generator.Fields;
 @RunWith(TheorySuite.class)
 /**
  * test the examples from https://github.com/pholser/junit-quickcheck
- *
  */
-public class QuickCheckIntegrationTest {
+@SuppressWarnings("deprecation")
+public class QuickCheckIntegrationTest
+{
 
-    @Theory
-    public void concatenationLength(@ForAll(sampleSize = 20) String s1, @ForAll(sampleSize = 20) String s2) {
+  @Theory
+  public void concatenationLength(@ForAll(sampleSize = 20) String s1, @ForAll(sampleSize = 20) String s2)
+  {
+    assertEquals(s1.length() + s2.length(), (s1 + s2).length());
+  }
 
-        assertEquals(s1.length() + s2.length(), (s1 + s2).length());
+  public static class Point
+  {
+    public double x;
+
+    public double y;
+
+    public double z;
+
+    public String toString()
+    {
+      return String.format("%g, %g, %g", x, y, z);
     }
+  }
 
-    public static class Point {
-        public double x;
-        public double y;
-        public double z;
+  @Theory
+  public void originDistance(@ForAll @From(Fields.class) Point p)
+  {
 
-        public String toString() {
-            return String.format("%g, %g, %g", x, y, z);
-        }
-    }
-
-    @Theory
-    public void originDistance(@ForAll @From(Fields.class) Point p) {
-
-        assertTrue(Math.sqrt(p.x * p.x + p.y * p.y + p.z * p.z) > 0);
-    }
+    assertTrue(Math.sqrt(p.x * p.x + p.y * p.y + p.z * p.z) > 0);
+  }
 
 }

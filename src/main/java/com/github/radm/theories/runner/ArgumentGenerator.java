@@ -58,6 +58,11 @@ public class ArgumentGenerator {
      */
     public Collection<MethodWithArguments> computeTestMethodsWithArgs() throws Throwable {
 
+        if (testMethod.getMethod().getParameterCount() == 0) {
+            return handleZeroArgsTheory();
+        }
+
+
         LOG.debug("computing cases for {}", testMethod.getName());
         List<ParameterSignature> signatures = ParameterSignature.signatures(testMethod.getMethod());
         List<String> colNames = new ArrayList<>(
@@ -97,6 +102,22 @@ public class ArgumentGenerator {
 
         return testsCalls;
     }
+
+
+	/**
+	 * special-case for issue #6.
+	 *
+	 * @return the collection
+	 */
+	private Collection<MethodWithArguments> handleZeroArgsTheory() {
+		Object[] rawArgs = new Object[0];
+		MethodWithArguments testCall = new MethodWithArguments(testMethod.getMethod(), rawArgs);
+
+		LOG.trace("Identified zero-argument test case {}", testCall);
+
+		testsCalls.add(testCall);
+		return testsCalls;
+	}
 
     private boolean isPairWise() {
         return testMethod.getMethod().isAnnotationPresent(Pairwise.class)
