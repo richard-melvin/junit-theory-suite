@@ -19,6 +19,7 @@ import com.github.radm.theories.Constraint;
  * test the @Constraint annotation
  *
  */
+@SuppressWarnings("javadoc")
 public class ConstraintTest extends CustomRunnerTest {
 
     public abstract static class SimpleConstraints {

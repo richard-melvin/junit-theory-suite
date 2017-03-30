@@ -15,7 +15,7 @@ import com.pholser.junit.quickcheck.generator.Fields;
 /**
  * test the examples from https://github.com/pholser/junit-quickcheck
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "javadoc"})
 public class QuickCheckIntegrationTest
 {
 

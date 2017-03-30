@@ -11,7 +11,7 @@ import org.junit.runner.Runner;
 import org.junit.runner.notification.RunListener;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.RunnerBuilder;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import com.github.radm.theories.TheorySuite;
@@ -51,10 +51,10 @@ public abstract class CustomRunnerTest {
     }
 
     protected void alwaysPassesWithCases(RunListener listener, int expected) throws Exception {
-        verify(listener, times(0)).testAssumptionFailure(Matchers.any());
-        verify(listener, times(0)).testFailure(Matchers.any());
-        verify(listener, times(expected)).testStarted(Matchers.any());
-        verify(listener, times(expected)).testFinished(Matchers.any());
+        verify(listener, times(0)).testAssumptionFailure(ArgumentMatchers.any());
+        verify(listener, times(0)).testFailure(ArgumentMatchers.any());
+        verify(listener, times(expected)).testStarted(ArgumentMatchers.any());
+        verify(listener, times(expected)).testFinished(ArgumentMatchers.any());
     }
 
 }

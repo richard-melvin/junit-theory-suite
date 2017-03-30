@@ -94,6 +94,11 @@ public class MethodSignature {
 
         final int[] argMapping;
 
+        /**
+         * Instantiates a new shim.
+         *
+         * @param argMapping the arg mapping
+         */
         public Shim(int[] argMapping) {
             super();
             this.argMapping = argMapping;
@@ -130,6 +135,11 @@ public class MethodSignature {
         }
     }
 
+    /**
+     * Gets the framework method.
+     *
+     * @return the framework method
+     */
     public FrameworkMethod getFrameworkMethod() {
         return fm;
     }

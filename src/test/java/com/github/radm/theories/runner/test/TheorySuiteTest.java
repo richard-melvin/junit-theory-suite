@@ -32,6 +32,7 @@ import org.mockito.Mockito;
  * unit test for TheorySuite. Covers more details than the ExampleTest
  *
  */
+@SuppressWarnings("javadoc")
 public class TheorySuiteTest extends CustomRunnerTest {
 
     public static class ValidTest {
